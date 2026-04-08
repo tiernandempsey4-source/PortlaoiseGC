@@ -1,15 +1,15 @@
 {
-  "name": "portlaoise-app",
+  "name": "portlaoise-interclub-app",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "firebase": "12.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "firebase": "12.11.0"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm install --legacy-peer-deps && react-scripts build"
+    "build": "react-scripts build"
   }
 }
