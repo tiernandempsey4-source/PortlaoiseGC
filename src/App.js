@@ -37,14 +37,41 @@ const CREST_URL =
   "https://irp.cdn-website.com/282f6f7b/dms3rep/multi/Portlaoise+G.C.png";
 
 const TEAM_OPTIONS = [
+  const TEAM_OPTIONS = [
   "Barton Shield",
+  "Irish Senior Cup",
+  "Irish Junior Cup",
+  "Irish Intermediate Cup",
   "Jimmy Bruen",
-  "Junior Cup",
-  "Senior Cup",
-  "Mixed",
-  "Ladies",
+  "Pierce Purcell",
+  "JB Carr",
+  "Central Towns Cup",
+  "Duggan Cup",
+  "Morrissey Cup",
+  "Senior Foursomes",
+  "Leinster Fourball",
+  "Leinster Clubs",
+  "Provincial Towns Cup",
+  "Barton Cup (Super Seniors)",
+  "Senior Cup (55+)",
+  "Super Seniors Interclub",
+  "Ladies Senior Cup",
+  "Ladies Intermediate Cup",
+  "Ladies Junior Cup",
+  "Ladies Minor Cup",
+  "Ladies Challenge Cup",
+  "Ladies Senior Foursomes",
+  "Mixed Foursomes",
+  "Flogas Mixed Foursomes",
+  "Irish Mixed",
+  "Mixed Interclub",
+  "Fred Daly Trophy",
+  "Boys Interclub",
+  "Girls Interclub",
   "Minor Cup",
   "Challenge Match",
+  "Friendly Match"
+];,
 ];
 
 const STANDARD_RESULTS = [
