@@ -37,7 +37,6 @@ const CREST_URL =
   "https://irp.cdn-website.com/282f6f7b/dms3rep/multi/Portlaoise+G.C.png";
 
 const TEAM_OPTIONS = [
-  const TEAM_OPTIONS = [
   "Barton Shield",
   "Irish Senior Cup",
   "Irish Junior Cup",
@@ -70,8 +69,7 @@ const TEAM_OPTIONS = [
   "Girls Interclub",
   "Minor Cup",
   "Challenge Match",
-  "Friendly Match",
-];,
+  "Friendly Match"
 ];
 
 const STANDARD_RESULTS = [
