@@ -11,6 +11,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   getFirestore,
   onSnapshot,
   orderBy,
@@ -106,10 +107,27 @@ function getFormatFromCompetition(teamName) {
   return "Singles";
 }
 
+const colors = {
+  navy: "#0f2d52",
+  royal: "#2448d8",
+  gold: "#d4a64a",
+  paleGold: "#fff8e7",
+  paleBlue: "#eff6ff",
+  borderBlue: "#bfdbfe",
+  slate: "#475569",
+  light: "#f8fafc",
+  greenBg: "#dcfce7",
+  greenText: "#166534",
+  redBg: "#fee2e2",
+  redText: "#991b1b",
+  amberBg: "#fef3c7",
+  amberText: "#92400e"
+};
+
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#f8fafc",
+    background: colors.light,
     padding: "14px",
     fontFamily: "Arial, sans-serif",
     color: "#0f172a"
@@ -170,7 +188,7 @@ const styles = {
     padding: "12px 14px",
     borderRadius: "12px",
     border: "none",
-    background: "#0f2d52",
+    background: colors.navy,
     color: "white",
     cursor: "pointer",
     fontWeight: 700,
@@ -179,9 +197,9 @@ const styles = {
   softButton: {
     padding: "12px 14px",
     borderRadius: "12px",
-    border: "1px solid #bfdbfe",
-    background: "#eff6ff",
-    color: "#1d4ed8",
+    border: `1px solid ${colors.borderBlue}`,
+    background: colors.paleBlue,
+    color: colors.royal,
     cursor: "pointer",
     fontWeight: 700,
     fontSize: "15px"
@@ -209,9 +227,9 @@ const styles = {
     cursor: "pointer"
   },
   activeChip: {
-    background: "#0f2d52",
+    background: colors.navy,
     color: "white",
-    border: "1px solid #0f2d52"
+    border: `1px solid ${colors.navy}`
   },
   badge: {
     display: "inline-block",
@@ -222,7 +240,7 @@ const styles = {
   },
   small: {
     fontSize: "14px",
-    color: "#475569"
+    color: colors.slate
   }
 };
 
@@ -299,21 +317,21 @@ function badgeStyle(match) {
 
   if (match.status === "Finished") {
     if (match.finishedResult === "Our team won") {
-      bg = "#dcfce7";
-      color = "#166534";
+      bg = colors.greenBg;
+      color = colors.greenText;
     } else if (match.finishedResult === "Their team won") {
-      bg = "#fee2e2";
-      color = "#991b1b";
+      bg = colors.redBg;
+      color = colors.redText;
     } else if (match.finishedResult === "Halved") {
-      bg = "#fef3c7";
-      color = "#92400e";
+      bg = colors.amberBg;
+      color = colors.amberText;
     }
   } else if (match.leader === "Our team") {
-    bg = "#dcfce7";
-    color = "#166534";
+    bg = colors.greenBg;
+    color = colors.greenText;
   } else if (match.leader === "Their team") {
-    bg = "#fee2e2";
-    color = "#991b1b";
+    bg = colors.redBg;
+    color = colors.redText;
   }
 
   return { ...styles.badge, background: bg, color };
@@ -336,14 +354,60 @@ function StatCard({ label, value }) {
   );
 }
 
-function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit, isActive }) {
+function getFixtureSummary(matches = [], ourClub, opposition) {
+  const official = matches.reduce(
+    (acc, match) => {
+      const pts = resultPoints(match);
+      acc.us += pts.us;
+      acc.them += pts.them;
+      return acc;
+    },
+    { us: 0, them: 0 }
+  );
+
+  const live = matches.reduce(
+    (acc, match) => {
+      if (match.status === "Finished") {
+        const pts = resultPoints(match);
+        acc.us += pts.us;
+        acc.them += pts.them;
+      } else if (match.status === "In Progress") {
+        if (match.leader === "Our team") {
+          acc.us += 1;
+        } else if (match.leader === "Their team") {
+          acc.them += 1;
+        } else {
+          acc.us += 0.5;
+          acc.them += 0.5;
+        }
+      }
+      return acc;
+    },
+    { us: 0, them: 0 }
+  );
+
+  let text = "Overall level";
+  if (live.us > live.them) text = `${ourClub} lead overall`;
+  if (live.them > live.us) text = `${opposition} lead overall`;
+
+  const liveCount = matches.filter((m) => m.status === "In Progress").length;
+
+  return {
+    official,
+    live,
+    text,
+    liveCount
+  };
+}
+
+function HomeFixtureCard({ fixture, summary, isActive }) {
   return (
     <div
       style={{
         ...styles.card,
         padding: "14px",
-        border: isActive ? "2px solid #2448d8" : "1px solid #e2e8f0",
-        background: isActive ? "#eff6ff" : "white"
+        border: isActive ? `2px solid ${colors.royal}` : "1px solid #e2e8f0",
+        background: isActive ? colors.paleBlue : "white"
       }}
     >
       <div
@@ -352,7 +416,7 @@ function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit, isActive }) {
           fontWeight: 700,
           letterSpacing: "1.2px",
           textTransform: "uppercase",
-          color: "#0f2d52"
+          color: colors.navy
         }}
       >
         {fixture.teamName}
@@ -363,18 +427,57 @@ function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit, isActive }) {
       <div style={{ ...styles.small, marginTop: "8px" }}>
         {fixture.venue || "Home"} {fixture.date ? `• ${fixture.date}` : ""}
       </div>
-      <div style={{ ...styles.small, marginTop: "4px" }}>
-        {fixture.status || "Live"}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "8px",
+          marginTop: "12px"
+        }}
+      >
+        <div
+          style={{
+            background: colors.paleBlue,
+            border: `1px solid ${colors.borderBlue}`,
+            borderRadius: "12px",
+            padding: "10px",
+            textAlign: "center"
+          }}
+        >
+          <div style={{ fontSize: "12px", color: colors.slate }}>Official</div>
+          <div style={{ fontWeight: 700 }}>
+            {summary.official.us}-{summary.official.them}
+          </div>
+        </div>
+        <div
+          style={{
+            background: colors.paleGold,
+            border: `1px solid ${colors.gold}`,
+            borderRadius: "12px",
+            padding: "10px",
+            textAlign: "center"
+          }}
+        >
+          <div style={{ fontSize: "12px", color: colors.slate }}>Live</div>
+          <div style={{ fontWeight: 700 }}>
+            {summary.live.us}-{summary.live.them}
+          </div>
+        </div>
       </div>
-      <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
-        <button type="button" style={styles.primaryButton} onClick={onOpenLive}>
-          Open Live View
-        </button>
-        {isCaptain ? (
-          <button type="button" style={styles.button} onClick={onOpenEdit}>
-            Edit Fixture
-          </button>
-        ) : null}
+
+      <div
+        style={{
+          marginTop: "12px",
+          fontWeight: 700,
+          color: colors.navy
+        }}
+      >
+        {summary.text}
+      </div>
+      <div style={{ ...styles.small, marginTop: "4px" }}>
+        {summary.liveCount} live match{summary.liveCount === 1 ? "" : "es"} •{" "}
+        {fixture.status || "Live"}
       </div>
     </div>
   );
@@ -398,6 +501,8 @@ export default function App() {
 
   const [newFixtureTeam, setNewFixtureTeam] = useState("Barton Shield");
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
+
+  const [fixtureSummaries, setFixtureSummaries] = useState({});
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (nextUser) =>
@@ -451,6 +556,29 @@ export default function App() {
 
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    if (!fixtures.length) return;
+
+    const unsubs = fixtures.map((fx) => {
+      const matchesQuery = query(
+        collection(db, "fixtures", fx.id, "matches"),
+        orderBy("order", "asc")
+      );
+
+      return onSnapshot(matchesQuery, (snap) => {
+        const list = snap.docs.map((d) => d.data());
+        setFixtureSummaries((prev) => ({
+          ...prev,
+          [fx.id]: getFixtureSummary(list, fx.ourClub, fx.opposition)
+        }));
+      });
+    });
+
+    return () => {
+      unsubs.forEach((fn) => fn && fn());
+    };
+  }, [fixtures]);
 
   useEffect(() => {
     if (!activeFixtureId) return;
@@ -582,6 +710,16 @@ export default function App() {
     matches.find((m) => m.id === selectedMatchId) || matches[0] || null;
 
   const isCaptain = !!user;
+
+  const tickerItems = useMemo(() => {
+    return fixtures.map((fx) => {
+      const summary = fixtureSummaries[fx.id];
+      if (!summary) {
+        return `${fx.teamName}: live`;
+      }
+      return `${fx.teamName}: ${summary.official.us}-${summary.official.them} official | ${summary.live.us}-${summary.live.them} live`;
+    });
+  }, [fixtures, fixtureSummaries]);
 
   async function saveFixtureField(key, value) {
     if (!isCaptain || !activeFixtureId) return;
@@ -765,18 +903,6 @@ export default function App() {
     }
   }
 
-  function openFixtureLive(id) {
-    setActiveFixtureId(id);
-    setSelectedMatchId("");
-    setScreen("spectator");
-  }
-
-  function openFixtureCaptain(id) {
-    setActiveFixtureId(id);
-    setSelectedMatchId("");
-    setScreen("captain");
-  }
-
   if (loading) {
     return (
       <div style={styles.page}>
@@ -789,11 +915,18 @@ export default function App() {
 
   return (
     <div style={styles.page}>
+      <style>{`
+        @keyframes tickerScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+
       <div style={styles.shell}>
         <div
           style={{
             ...styles.card,
-            background: "linear-gradient(135deg, #0f2d52 0%, #2448d8 100%)",
+            background: `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`,
             color: "white",
             position: "relative",
             overflow: "hidden",
@@ -866,14 +999,77 @@ export default function App() {
               </h1>
               <p
                 style={{
-                  color: "rgba(255,255,255,0.92)",
+                  color: "rgba(255,255,255,0.95)",
                   marginTop: "8px",
-                  marginBottom: 0
+                  marginBottom: 0,
+                  maxWidth: "900px",
+                  lineHeight: 1.45
                 }}
               >
-                Cleaner navigation, fixture switching, tabs, dropdowns and easier
-                browsing.
+                Best of luck to all Portlaoise teams, players and managers.
+                Thank you to all our supporters. Captains Betty and Tiernan,
+                and President Eddie.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            ...styles.card,
+            padding: "0",
+            overflow: "hidden",
+            borderColor: colors.gold,
+            background: colors.paleGold,
+            marginBottom: "16px"
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              minHeight: "48px"
+            }}
+          >
+            <div
+              style={{
+                background: colors.navy,
+                color: "white",
+                fontWeight: 700,
+                padding: "14px 16px",
+                flexShrink: 0
+              }}
+            >
+              LIVE
+            </div>
+            <div
+              style={{
+                overflow: "hidden",
+                width: "100%"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  width: "max-content",
+                  animation: "tickerScroll 28s linear infinite"
+                }}
+              >
+                {[...tickerItems, ...tickerItems].map((item, index) => (
+                  <div
+                    key={`${item}-${index}`}
+                    style={{
+                      padding: "0 24px",
+                      lineHeight: "48px",
+                      whiteSpace: "nowrap",
+                      fontWeight: 700,
+                      color: colors.navy
+                    }}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -949,11 +1145,11 @@ export default function App() {
                 }}
               >
                 <div>
-                  <h2 style={{ margin: 0, color: "#0f2d52" }}>
+                  <h2 style={{ margin: 0, color: colors.navy }}>
                     Club Match Centre
                   </h2>
                   <div style={styles.small}>
-                    Pick a fixture below to follow scores or edit as captain.
+                    Live fixtures and scores across all Portlaoise teams.
                   </div>
                 </div>
                 <img
@@ -967,19 +1163,20 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
                 gap: "12px",
                 marginBottom: "16px"
               }}
             >
               {fixtures.map((item) => (
-                <FixtureCard
+                <HomeFixtureCard
                   key={item.id}
                   fixture={item}
-                  isCaptain={isCaptain}
+                  summary={
+                    fixtureSummaries[item.id] ||
+                    getFixtureSummary([], item.ourClub, item.opposition)
+                  }
                   isActive={item.id === activeFixtureId}
-                  onOpenLive={() => openFixtureLive(item.id)}
-                  onOpenEdit={() => openFixtureCaptain(item.id)}
                 />
               ))}
             </div>
@@ -1014,12 +1211,12 @@ export default function App() {
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "1.5px",
-                      color: "#0f2d52"
+                      color: colors.navy
                     }}
                   >
                     {fixture.teamName} • {fixture.competition}
                   </div>
-                  <h2 style={{ margin: "6px 0 8px 0", color: "#0f2d52" }}>
+                  <h2 style={{ margin: "6px 0 8px 0", color: colors.navy }}>
                     {fixture.ourClub} vs {fixture.opposition}
                   </h2>
                   <div style={styles.small}>
@@ -1042,7 +1239,9 @@ export default function App() {
               </div>
 
               <div style={{ marginTop: "14px" }}>
-                <label style={{ ...styles.label, marginBottom: "6px", display: "block" }}>
+                <label
+                  style={{ ...styles.label, marginBottom: "6px", display: "block" }}
+                >
                   Switch Fixture
                 </label>
                 <select
@@ -1101,7 +1300,9 @@ export default function App() {
                 ...styles.card,
                 marginBottom: "16px",
                 overflowX: "auto",
-                whiteSpace: "nowrap"
+                whiteSpace: "nowrap",
+                borderColor: colors.borderBlue,
+                background: colors.paleBlue
               }}
             >
               <div style={{ display: "flex", gap: "10px", minWidth: "max-content" }}>
@@ -1121,11 +1322,11 @@ export default function App() {
                         textAlign: "left",
                         borderRadius: "16px",
                         background: isActive
-                          ? "linear-gradient(135deg, #0f2d52 0%, #2448d8 100%)"
+                          ? `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`
                           : "white",
                         color: isActive ? "white" : "#0f172a",
                         border: isActive
-                          ? "1px solid #0f2d52"
+                          ? `1px solid ${colors.navy}`
                           : "1px solid #cbd5e1"
                       }}
                     >
@@ -1143,7 +1344,13 @@ export default function App() {
                       <div style={{ fontWeight: 700, marginTop: "6px" }}>
                         vs {item.opposition}
                       </div>
-                      <div style={{ marginTop: "6px", fontSize: "13px", opacity: isActive ? 0.95 : 0.7 }}>
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          fontSize: "13px",
+                          opacity: isActive ? 0.95 : 0.7
+                        }}
+                      >
                         {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
                       </div>
                     </button>
@@ -1200,14 +1407,14 @@ export default function App() {
               style={{
                 ...styles.card,
                 marginBottom: "16px",
-                background: "#eff6ff",
-                borderColor: "#bfdbfe"
+                background: colors.paleGold,
+                borderColor: colors.gold
               }}
             >
               <div
                 style={{
                   fontWeight: 700,
-                  color: "#0f2d52",
+                  color: colors.navy,
                   marginBottom: "6px"
                 }}
               >
@@ -1221,7 +1428,7 @@ export default function App() {
             </div>
 
             <div style={{ ...styles.card, marginBottom: "16px" }}>
-              <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Matches</h3>
+              <h3 style={{ marginTop: 0, color: colors.navy }}>Matches</h3>
               {matches.map((match, index) => (
                 <div
                   key={match.id}
@@ -1260,7 +1467,7 @@ export default function App() {
           </div>
         ) : !isCaptain ? (
           <div style={{ ...styles.card, marginBottom: "16px" }}>
-            <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Captain Login</h3>
+            <h3 style={{ marginTop: 0, color: colors.navy }}>Captain Login</h3>
             <form onSubmit={signInCaptain}>
               <div style={styles.inputWrap}>
                 <label style={styles.label}>Email</label>
@@ -1287,7 +1494,7 @@ export default function App() {
         ) : (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px" }}>
-              <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+              <h3 style={{ marginTop: 0, color: colors.navy }}>
                 Create New Fixture
               </h3>
               <div
@@ -1343,20 +1550,20 @@ export default function App() {
             >
               <div>
                 <div style={{ ...styles.card, marginBottom: "16px" }}>
-                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Fixtures</h3>
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>Fixtures</h3>
                   {fixtures.map((item) => (
                     <div
                       key={item.id}
                       style={{
                         border:
                           activeFixtureId === item.id
-                            ? "2px solid #2448d8"
+                            ? `2px solid ${colors.royal}`
                             : "1px solid #e2e8f0",
                         borderRadius: "14px",
                         padding: "12px",
                         marginBottom: "10px",
                         background:
-                          activeFixtureId === item.id ? "#eff6ff" : "white"
+                          activeFixtureId === item.id ? colors.paleBlue : "white"
                       }}
                     >
                       <button
@@ -1383,7 +1590,7 @@ export default function App() {
                 </div>
 
                 <div style={styles.card}>
-                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>
                     Match List
                   </h3>
                   <button
@@ -1400,13 +1607,13 @@ export default function App() {
                       style={{
                         border:
                           selectedMatch?.id === match.id
-                            ? "2px solid #2448d8"
+                            ? `2px solid ${colors.royal}`
                             : "1px solid #e2e8f0",
                         borderRadius: "14px",
                         padding: "12px",
                         marginBottom: "10px",
                         background:
-                          selectedMatch?.id === match.id ? "#eff6ff" : "white"
+                          selectedMatch?.id === match.id ? colors.paleBlue : "white"
                       }}
                     >
                       <button
@@ -1437,7 +1644,7 @@ export default function App() {
 
               <div>
                 <div style={{ ...styles.card, marginBottom: "16px" }}>
-                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>
                     Fixture Setup
                   </h3>
 
@@ -1556,15 +1763,15 @@ export default function App() {
                 <div
                   style={{
                     ...styles.card,
-                    background: "#eff6ff",
-                    borderColor: "#bfdbfe",
+                    background: colors.paleGold,
+                    borderColor: colors.gold,
                     marginBottom: "16px"
                   }}
                 >
                   <div
                     style={{
                       fontWeight: 700,
-                      color: "#0f2d52",
+                      color: colors.navy,
                       marginBottom: "6px"
                     }}
                   >
@@ -1580,7 +1787,7 @@ export default function App() {
 
                 {selectedMatch ? (
                   <div style={styles.card}>
-                    <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+                    <h3 style={{ marginTop: 0, color: colors.navy }}>
                       Edit Selected Match
                     </h3>
 
