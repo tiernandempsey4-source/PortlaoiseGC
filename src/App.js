@@ -323,7 +323,7 @@ function StatCard({ label, value }) {
 }
 
 export default function App() {
-  const [viewMode, setViewMode] = useState("spectator");
+  const [viewMode, setViewMode] = useState("home");
   const [fixtures, setFixtures] = useState([]);
   const [activeFixtureId, setActiveFixtureId] = useState("");
   const [fixture, setFixture] = useState(defaultFixture());
@@ -780,6 +780,15 @@ export default function App() {
             }}
             onClick={() => setViewMode("spectator")}
           >
+<button
+  style={{
+    ...styles.chip,
+    ...(viewMode === "home" ? styles.activeChip : {})
+  }}
+  onClick={() => setViewMode("home")}
+>
+  Home
+</button>
             Spectator View
           </button>
           <button
@@ -907,7 +916,34 @@ export default function App() {
           </div>
         </div>
 
-        {viewMode === "spectator" ? (
+        {viewMode === "home" ? (
+          <div>
+  <div style={{ ...styles.card, marginBottom: "16px" }}>
+    <h2 style={{ margin: 0 }}>Club Match Centre</h2>
+    <div style={styles.small}>
+      View all live fixtures below
+    </div>
+  </div>
+
+  <div style={{ display: "grid", gap: "12px" }}>
+    {fixtures.map((f) => (
+      <div key={f.id} style={styles.card}>
+        <div style={{ fontWeight: 700 }}>{f.teamName}</div>
+        <div>{f.ourClub} vs {f.opposition}</div>
+
+        <button
+          style={{ ...styles.primaryButton, marginTop: "10px" }}
+          onClick={() => {
+            setActiveFixtureId(f.id);
+            setViewMode("spectator");
+          }}
+        >
+          View Match
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
           <div>
             <div style={{ ...styles.card, marginBottom: "16px" }}>
               <div
