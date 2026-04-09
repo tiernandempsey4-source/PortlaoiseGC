@@ -115,7 +115,7 @@ const styles = {
     color: "#0f172a"
   },
   shell: {
-    maxWidth: "1180px",
+    maxWidth: "1220px",
     margin: "0 auto"
   },
   card: {
@@ -336,9 +336,16 @@ function StatCard({ label, value }) {
   );
 }
 
-function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit }) {
+function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit, isActive }) {
   return (
-    <div style={{ ...styles.card, padding: "14px" }}>
+    <div
+      style={{
+        ...styles.card,
+        padding: "14px",
+        border: isActive ? "2px solid #2448d8" : "1px solid #e2e8f0",
+        background: isActive ? "#eff6ff" : "white"
+      }}
+    >
       <div
         style={{
           fontSize: "12px",
@@ -498,6 +505,18 @@ export default function App() {
       unsubMatches();
     };
   }, [activeFixtureId, fixture.teamName]);
+
+  const activeFixtureIndex = useMemo(
+    () => fixtures.findIndex((f) => f.id === activeFixtureId),
+    [fixtures, activeFixtureId]
+  );
+
+  const previousFixture =
+    activeFixtureIndex > 0 ? fixtures[activeFixtureIndex - 1] : null;
+  const nextFixture =
+    activeFixtureIndex >= 0 && activeFixtureIndex < fixtures.length - 1
+      ? fixtures[activeFixtureIndex + 1]
+      : null;
 
   const totals = useMemo(() => {
     return matches.reduce(
@@ -852,8 +871,8 @@ export default function App() {
                   marginBottom: 0
                 }}
               >
-                Clearer home screen, cleaner spectator view, simpler captain
-                editor.
+                Cleaner navigation, fixture switching, tabs, dropdowns and easier
+                browsing.
               </p>
             </div>
           </div>
@@ -958,6 +977,7 @@ export default function App() {
                   key={item.id}
                   fixture={item}
                   isCaptain={isCaptain}
+                  isActive={item.id === activeFixtureId}
                   onOpenLive={() => openFixtureLive(item.id)}
                   onOpenEdit={() => openFixtureCaptain(item.id)}
                 />
@@ -1020,6 +1040,142 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              <div style={{ marginTop: "14px" }}>
+                <label style={{ ...styles.label, marginBottom: "6px", display: "block" }}>
+                  Switch Fixture
+                </label>
+                <select
+                  style={styles.select}
+                  value={activeFixtureId}
+                  onChange={(e) => {
+                    setActiveFixtureId(e.target.value);
+                    setSelectedMatchId("");
+                  }}
+                >
+                  {fixtures.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.teamName} vs {item.opposition}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginTop: "12px",
+                  flexWrap: "wrap"
+                }}
+              >
+                <button
+                  type="button"
+                  style={styles.button}
+                  disabled={!previousFixture}
+                  onClick={() => {
+                    if (!previousFixture) return;
+                    setActiveFixtureId(previousFixture.id);
+                    setSelectedMatchId("");
+                  }}
+                >
+                  ← Previous Fixture
+                </button>
+                <button
+                  type="button"
+                  style={styles.button}
+                  disabled={!nextFixture}
+                  onClick={() => {
+                    if (!nextFixture) return;
+                    setActiveFixtureId(nextFixture.id);
+                    setSelectedMatchId("");
+                  }}
+                >
+                  Next Fixture →
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                ...styles.card,
+                marginBottom: "16px",
+                overflowX: "auto",
+                whiteSpace: "nowrap"
+              }}
+            >
+              <div style={{ display: "flex", gap: "10px", minWidth: "max-content" }}>
+                {fixtures.map((item) => {
+                  const isActive = item.id === activeFixtureId;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveFixtureId(item.id);
+                        setSelectedMatchId("");
+                      }}
+                      style={{
+                        ...styles.button,
+                        minWidth: "240px",
+                        textAlign: "left",
+                        borderRadius: "16px",
+                        background: isActive
+                          ? "linear-gradient(135deg, #0f2d52 0%, #2448d8 100%)"
+                          : "white",
+                        color: isActive ? "white" : "#0f172a",
+                        border: isActive
+                          ? "1px solid #0f2d52"
+                          : "1px solid #cbd5e1"
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          letterSpacing: "1.2px",
+                          textTransform: "uppercase",
+                          opacity: isActive ? 0.95 : 0.7
+                        }}
+                      >
+                        {item.teamName}
+                      </div>
+                      <div style={{ fontWeight: 700, marginTop: "6px" }}>
+                        vs {item.opposition}
+                      </div>
+                      <div style={{ marginTop: "6px", fontSize: "13px", opacity: isActive ? 0.95 : 0.7 }}>
+                        {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                marginBottom: "16px",
+                flexWrap: "wrap"
+              }}
+            >
+              {fixtures.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  style={{
+                    ...styles.chip,
+                    ...(item.id === activeFixtureId ? styles.activeChip : {})
+                  }}
+                  onClick={() => {
+                    setActiveFixtureId(item.id);
+                    setSelectedMatchId("");
+                  }}
+                >
+                  {item.teamName}
+                </button>
+              ))}
             </div>
 
             <div
@@ -1308,6 +1464,7 @@ export default function App() {
                         ))}
                       </select>
                     </div>
+
                     <div style={styles.inputWrap}>
                       <label style={styles.label}>Competition</label>
                       <input
@@ -1324,6 +1481,7 @@ export default function App() {
                         }
                       />
                     </div>
+
                     <div style={styles.inputWrap}>
                       <label style={styles.label}>Date</label>
                       <input
@@ -1339,6 +1497,7 @@ export default function App() {
                         onBlur={(e) => saveFixtureField("date", e.target.value)}
                       />
                     </div>
+
                     <div style={styles.inputWrap}>
                       <label style={styles.label}>Opposition</label>
                       <input
@@ -1355,6 +1514,7 @@ export default function App() {
                         }
                       />
                     </div>
+
                     <div style={styles.inputWrap}>
                       <label style={styles.label}>Venue</label>
                       <select
@@ -1373,6 +1533,7 @@ export default function App() {
                         <option>Neutral</option>
                       </select>
                     </div>
+
                     <div style={styles.inputWrap}>
                       <label style={styles.label}>Captain / Manager</label>
                       <input
