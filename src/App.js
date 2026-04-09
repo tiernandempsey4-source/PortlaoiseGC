@@ -9,6 +9,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getFirestore,
   onSnapshot,
@@ -185,6 +186,16 @@ const styles = {
     fontWeight: 700,
     fontSize: "15px"
   },
+  dangerButton: {
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "1px solid #ef4444",
+    background: "white",
+    color: "#ef4444",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: "15px"
+  },
   chip: {
     display: "inline-flex",
     alignItems: "center",
@@ -325,19 +336,59 @@ function StatCard({ label, value }) {
   );
 }
 
+function FixtureCard({ fixture, isCaptain, onOpenLive, onOpenEdit }) {
+  return (
+    <div style={{ ...styles.card, padding: "14px" }}>
+      <div
+        style={{
+          fontSize: "12px",
+          fontWeight: 700,
+          letterSpacing: "1.2px",
+          textTransform: "uppercase",
+          color: "#0f2d52"
+        }}
+      >
+        {fixture.teamName}
+      </div>
+      <div style={{ fontSize: "18px", fontWeight: 700, marginTop: "6px" }}>
+        {fixture.ourClub || "Portlaoise Golf Club"} vs {fixture.opposition}
+      </div>
+      <div style={{ ...styles.small, marginTop: "8px" }}>
+        {fixture.venue || "Home"} {fixture.date ? `• ${fixture.date}` : ""}
+      </div>
+      <div style={{ ...styles.small, marginTop: "4px" }}>
+        {fixture.status || "Live"}
+      </div>
+      <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+        <button type="button" style={styles.primaryButton} onClick={onOpenLive}>
+          Open Live View
+        </button>
+        {isCaptain ? (
+          <button type="button" style={styles.button} onClick={onOpenEdit}>
+            Edit Fixture
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [viewMode, setViewMode] = useState("home");
+  const [screen, setScreen] = useState("home");
   const [fixtures, setFixtures] = useState([]);
   const [activeFixtureId, setActiveFixtureId] = useState("");
   const [fixture, setFixture] = useState(defaultFixture());
   const [matches, setMatches] = useState(defaultMatches());
   const [selectedMatchId, setSelectedMatchId] = useState("match-1");
   const [user, setUser] = useState(null);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
+
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [newFixtureTeam, setNewFixtureTeam] = useState("Barton Shield");
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
 
@@ -432,8 +483,12 @@ export default function App() {
           id: docSnap.id,
           ...docSnap.data()
         }));
+
         setMatches(nextMatches);
-        setSelectedMatchId((current) => current || nextMatches[0]?.id || "");
+        setSelectedMatchId((current) => {
+          if (nextMatches.find((m) => m.id === current)) return current;
+          return nextMatches[0]?.id || "";
+        });
       },
       (err) => setError(err.message || "Could not load matches.")
     );
@@ -491,7 +546,6 @@ export default function App() {
     const allSquare = matches.filter(
       (m) => m.status === "In Progress" && m.leader === "All Square"
     ).length;
-
     return { ourLeading, theirLeading, allSquare };
   }, [matches]);
 
@@ -569,6 +623,18 @@ export default function App() {
     setSelectedMatchId(nextId);
   }
 
+  async function deleteMatch(matchId) {
+    if (!isCaptain || !activeFixtureId) return;
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this match?"
+    );
+    if (!confirmDelete) return;
+
+    await deleteDoc(doc(db, "fixtures", activeFixtureId, "matches", matchId));
+    setSelectedMatchId("");
+  }
+
   async function createFixture() {
     if (!isCaptain) return;
 
@@ -592,6 +658,7 @@ export default function App() {
     setActiveFixtureId(fixtureRef.id);
     setSelectedMatchId("match-1");
     setNewFixtureOpposition("");
+    setScreen("captain");
   }
 
   async function signInCaptain(e) {
@@ -602,7 +669,7 @@ export default function App() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setPassword("");
-      setViewMode("captain");
+      setScreen("captain");
     } catch (err) {
       setError(err.message || "Login failed.");
     } finally {
@@ -612,7 +679,7 @@ export default function App() {
 
   async function logOutCaptain() {
     await signOut(auth);
-    setViewMode("home");
+    setScreen("home");
   }
 
   async function setLeaderQuick(leader) {
@@ -677,6 +744,18 @@ export default function App() {
     } catch {
       alert("Copy failed on this browser.");
     }
+  }
+
+  function openFixtureLive(id) {
+    setActiveFixtureId(id);
+    setSelectedMatchId("");
+    setScreen("spectator");
+  }
+
+  function openFixtureCaptain(id) {
+    setActiveFixtureId(id);
+    setSelectedMatchId("");
+    setScreen("captain");
   }
 
   if (loading) {
@@ -773,8 +852,8 @@ export default function App() {
                   marginBottom: 0
                 }}
               >
-                Multiple team fixtures, live scoring and spectator tracking in
-                one place.
+                Clearer home screen, cleaner spectator view, simpler captain
+                editor.
               </p>
             </div>
           </div>
@@ -791,29 +870,29 @@ export default function App() {
           <button
             style={{
               ...styles.chip,
-              ...(viewMode === "home" ? styles.activeChip : {})
+              ...(screen === "home" ? styles.activeChip : {})
             }}
-            onClick={() => setViewMode("home")}
+            onClick={() => setScreen("home")}
           >
             Home
           </button>
           <button
             style={{
               ...styles.chip,
-              ...(viewMode === "spectator" ? styles.activeChip : {})
+              ...(screen === "spectator" ? styles.activeChip : {})
             }}
-            onClick={() => setViewMode("spectator")}
+            onClick={() => setScreen("spectator")}
           >
-            Spectator View
+            Spectator
           </button>
           <button
             style={{
               ...styles.chip,
-              ...(viewMode === "captain" ? styles.activeChip : {})
+              ...(screen === "captain" ? styles.activeChip : {})
             }}
-            onClick={() => setViewMode("captain")}
+            onClick={() => setScreen("captain")}
           >
-            Captain View
+            Captain
           </button>
           <button style={styles.button} onClick={copySummary}>
             Copy Summary
@@ -838,7 +917,7 @@ export default function App() {
           </div>
         ) : null}
 
-        {viewMode === "home" ? (
+        {screen === "home" ? (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px" }}>
               <div
@@ -855,7 +934,7 @@ export default function App() {
                     Club Match Centre
                   </h2>
                   <div style={styles.small}>
-                    A cleaner home screen for members and captains.
+                    Pick a fixture below to follow scores or edit as captain.
                   </div>
                 </div>
                 <img
@@ -874,127 +953,36 @@ export default function App() {
                 marginBottom: "16px"
               }}
             >
-              {fixtures.map((item) => {
-                const isActive = activeFixtureId === item.id;
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      ...styles.card,
-                      padding: "14px",
-                      border: isActive
-                        ? "2px solid #2448d8"
-                        : "1px solid #e2e8f0",
-                      background: isActive ? "#eff6ff" : "white"
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        letterSpacing: "1.2px",
-                        textTransform: "uppercase",
-                        color: "#0f2d52"
-                      }}
-                    >
-                      {item.teamName}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: 700,
-                        marginTop: "6px"
-                      }}
-                    >
-                      {(item.ourClub || "Portlaoise Golf Club")} vs{" "}
-                      {item.opposition}
-                    </div>
-                    <div style={{ ...styles.small, marginTop: "8px" }}>
-                      {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
-                    </div>
-                    <div style={{ ...styles.small, marginTop: "4px" }}>
-                      {item.status || "Live"}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        marginTop: "12px",
-                        flexWrap: "wrap"
-                      }}
-                    >
-                      <button
-                        type="button"
-                        style={styles.primaryButton}
-                        onClick={() => {
-                          setActiveFixtureId(item.id);
-                          setSelectedMatchId("");
-                          setViewMode("spectator");
-                        }}
-                      >
-                        Open Live View
-                      </button>
-                      {isCaptain ? (
-                        <button
-                          type="button"
-                          style={styles.button}
-                          onClick={() => {
-                            setActiveFixtureId(item.id);
-                            setSelectedMatchId("");
-                            setViewMode("captain");
-                          }}
-                        >
-                          Edit Fixture
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
+              {fixtures.map((item) => (
+                <FixtureCard
+                  key={item.id}
+                  fixture={item}
+                  isCaptain={isCaptain}
+                  onOpenLive={() => openFixtureLive(item.id)}
+                  onOpenEdit={() => openFixtureCaptain(item.id)}
+                />
+              ))}
             </div>
 
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "16px"
+                gap: "12px"
               }}
             >
-              <StatCard label="Total Live Fixtures" value={fixtures.length} />
-              <StatCard label="Selected Fixture Matches" value={matches.length} />
-            </div>
-
-            <div
-              style={{
-                ...styles.card,
-                background: "#eff6ff",
-                borderColor: "#bfdbfe"
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: "#0f2d52",
-                  marginBottom: "6px"
-                }}
-              >
-                App-style version
-              </div>
-              <div style={styles.small}>
-                This gives you a cleaner home screen and structure for moving
-                toward an app-store-ready product.
-              </div>
+              <StatCard label="Total Fixtures" value={fixtures.length} />
+              <StatCard label="Current Fixture Matches" value={matches.length} />
             </div>
           </div>
-        ) : viewMode === "spectator" ? (
+        ) : screen === "spectator" ? (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px" }}>
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "space-between",
+                  alignItems: "center",
                   gap: "12px",
                   flexWrap: "wrap"
                 }}
@@ -1020,18 +1008,17 @@ export default function App() {
                   <div style={styles.small}>
                     Captain: {fixture.captain || "TBC"}
                   </div>
-                  <div style={styles.small}>
-                    Updated:{" "}
-                    {fixture.updatedAt
-                      ? new Date(fixture.updatedAt).toLocaleTimeString()
-                      : "—"}
-                  </div>
                 </div>
-                <img
-                  src={CREST_URL}
-                  alt="Club crest"
-                  style={{ width: 64, height: 64, objectFit: "contain" }}
-                />
+
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    style={styles.button}
+                    onClick={() => setScreen("home")}
+                  >
+                    Back Home
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1051,20 +1038,6 @@ export default function App() {
                 label="Live Overall"
                 value={`${liveTotals.us}-${liveTotals.them}`}
               />
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "16px"
-              }}
-            >
-              <StatCard
-                label="Matches Leading"
-                value={`${liveMatchSummary.ourLeading}-${liveMatchSummary.theirLeading}`}
-              />
-              <StatCard label="Live Matches" value={totals.live} />
             </div>
 
             <div
@@ -1092,9 +1065,7 @@ export default function App() {
             </div>
 
             <div style={{ ...styles.card, marginBottom: "16px" }}>
-              <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
-                Live Matchboard
-              </h3>
+              <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Matches</h3>
               {matches.map((match, index) => (
                 <div
                   key={match.id}
@@ -1131,90 +1102,189 @@ export default function App() {
               ))}
             </div>
           </div>
+        ) : !isCaptain ? (
+          <div style={{ ...styles.card, marginBottom: "16px" }}>
+            <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Captain Login</h3>
+            <form onSubmit={signInCaptain}>
+              <div style={styles.inputWrap}>
+                <label style={styles.label}>Email</label>
+                <input
+                  style={styles.input}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div style={styles.inputWrap}>
+                <label style={styles.label}>Password</label>
+                <input
+                  style={styles.input}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <button style={styles.primaryButton} disabled={authLoading}>
+                {authLoading ? "Signing In..." : "Sign In"}
+              </button>
+            </form>
+          </div>
         ) : (
           <div>
-            {!isCaptain ? (
-              <div style={{ ...styles.card, marginBottom: "16px" }}>
-                <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
-                  Captain Login
-                </h3>
-                <form onSubmit={signInCaptain}>
-                  <div style={styles.inputWrap}>
-                    <label style={styles.label}>Email</label>
-                    <input
-                      style={styles.input}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div style={styles.inputWrap}>
-                    <label style={styles.label}>Password</label>
-                    <input
-                      style={styles.input}
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <button style={styles.primaryButton} disabled={authLoading}>
-                    {authLoading ? "Signing In..." : "Sign In"}
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <>
-                <div style={{ ...styles.card, marginBottom: "16px" }}>
-                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
-                    Create New Fixture
-                  </h3>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr 1fr",
-                      gap: "12px"
-                    }}
+            <div style={{ ...styles.card, marginBottom: "16px" }}>
+              <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+                Create New Fixture
+              </h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 1fr",
+                  gap: "12px"
+                }}
+              >
+                <div style={styles.inputWrap}>
+                  <label style={styles.label}>Team</label>
+                  <select
+                    style={styles.select}
+                    value={newFixtureTeam}
+                    onChange={(e) => setNewFixtureTeam(e.target.value)}
                   >
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Team</label>
-                      <select
-                        style={styles.select}
-                        value={newFixtureTeam}
-                        onChange={(e) => setNewFixtureTeam(e.target.value)}
-                      >
-                        {TEAM_OPTIONS.map((team) => (
-                          <option key={team} value={team}>
-                            {team}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Opposition</label>
-                      <input
-                        style={styles.input}
-                        value={newFixtureOpposition}
-                        onChange={(e) =>
-                          setNewFixtureOpposition(e.target.value)
-                        }
-                        placeholder="Opposition name"
-                      />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "end" }}>
-                      <button
-                        type="button"
-                        style={{ ...styles.primaryButton, width: "100%" }}
-                        onClick={createFixture}
-                      >
-                        Create Fixture
-                      </button>
-                    </div>
-                  </div>
+                    {TEAM_OPTIONS.map((team) => (
+                      <option key={team} value={team}>
+                        {team}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
+                <div style={styles.inputWrap}>
+                  <label style={styles.label}>Opposition</label>
+                  <input
+                    style={styles.input}
+                    value={newFixtureOpposition}
+                    onChange={(e) => setNewFixtureOpposition(e.target.value)}
+                    placeholder="Opposition name"
+                  />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "end" }}>
+                  <button
+                    type="button"
+                    style={{ ...styles.primaryButton, width: "100%" }}
+                    onClick={createFixture}
+                  >
+                    Create Fixture
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "320px 1fr",
+                gap: "16px"
+              }}
+            >
+              <div>
+                <div style={{ ...styles.card, marginBottom: "16px" }}>
+                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>Fixtures</h3>
+                  {fixtures.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        border:
+                          activeFixtureId === item.id
+                            ? "2px solid #2448d8"
+                            : "1px solid #e2e8f0",
+                        borderRadius: "14px",
+                        padding: "12px",
+                        marginBottom: "10px",
+                        background:
+                          activeFixtureId === item.id ? "#eff6ff" : "white"
+                      }}
+                    >
+                      <button
+                        type="button"
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          textAlign: "left",
+                          padding: 0,
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                        onClick={() => {
+                          setActiveFixtureId(item.id);
+                          setSelectedMatchId("");
+                        }}
+                      >
+                        <div style={{ fontWeight: 700 }}>{item.teamName}</div>
+                        <div style={styles.small}>vs {item.opposition}</div>
+                        <div style={styles.small}>{item.date || "No date set"}</div>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={styles.card}>
+                  <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
+                    Match List
+                  </h3>
+                  <button
+                    type="button"
+                    style={{ ...styles.primaryButton, width: "100%", marginBottom: "12px" }}
+                    onClick={addMatch}
+                  >
+                    Add Match
+                  </button>
+
+                  {matches.map((match, index) => (
+                    <div
+                      key={match.id}
+                      style={{
+                        border:
+                          selectedMatch?.id === match.id
+                            ? "2px solid #2448d8"
+                            : "1px solid #e2e8f0",
+                        borderRadius: "14px",
+                        padding: "12px",
+                        marginBottom: "10px",
+                        background:
+                          selectedMatch?.id === match.id ? "#eff6ff" : "white"
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMatchId(match.id)}
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          textAlign: "left",
+                          padding: 0,
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <div style={{ fontWeight: 700 }}>Match {index + 1}</div>
+                        <div style={styles.small}>
+                          {match.ourPlayers || "TBC"} vs{" "}
+                          {match.theirPlayers || "TBC"}
+                        </div>
+                        <div style={{ marginTop: "6px" }}>
+                          <span style={badgeStyle(match)}>{liveStatus(match)}</span>
+                        </div>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
                 <div style={{ ...styles.card, marginBottom: "16px" }}>
                   <h3 style={{ marginTop: 0, color: "#0f2d52" }}>
                     Fixture Setup
                   </h3>
+
                   <div
                     style={{
                       display: "grid",
@@ -1327,8 +1397,7 @@ export default function App() {
                     ...styles.card,
                     background: "#eff6ff",
                     borderColor: "#bfdbfe",
-                    marginBottom: "14px",
-                    padding: "12px"
+                    marginBottom: "16px"
                   }}
                 >
                   <div
@@ -1346,82 +1415,6 @@ export default function App() {
                     {liveMatchSummary.theirLeading} • All square:{" "}
                     {liveMatchSummary.allSquare}
                   </div>
-                </div>
-
-                <div style={{ ...styles.card, marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      marginBottom: "12px"
-                    }}
-                  >
-                    <h3 style={{ margin: 0, color: "#0f2d52" }}>
-                      Captain Match List
-                    </h3>
-                    <button
-                      type="button"
-                      style={styles.primaryButton}
-                      onClick={addMatch}
-                    >
-                      Add Match
-                    </button>
-                  </div>
-
-                  {matches.map((match, index) => (
-                    <div
-                      key={match.id}
-                      style={{
-                        border:
-                          selectedMatch?.id === match.id
-                            ? "2px solid #2448d8"
-                            : "1px solid #e2e8f0",
-                        borderRadius: "16px",
-                        padding: "12px",
-                        marginBottom: "10px",
-                        background:
-                          selectedMatch?.id === match.id ? "#eff6ff" : "white"
-                      }}
-                    >
-                      <button
-                        onClick={() => setSelectedMatchId(match.id)}
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          textAlign: "left",
-                          padding: 0,
-                          cursor: "pointer",
-                          width: "100%"
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "10px",
-                            alignItems: "center",
-                            flexWrap: "wrap"
-                          }}
-                        >
-                          <div>
-                            <div style={{ fontWeight: 700 }}>
-                              Match {index + 1}
-                            </div>
-                            <div style={styles.small}>
-                              {match.ourPlayers || "TBC"} vs{" "}
-                              {match.theirPlayers || "TBC"}
-                            </div>
-                          </div>
-                          <span style={badgeStyle(match)}>
-                            {liveStatus(match)}
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                  ))}
                 </div>
 
                 {selectedMatch ? (
@@ -1460,6 +1453,7 @@ export default function App() {
                           }
                         />
                       </div>
+
                       <div style={styles.inputWrap}>
                         <label style={styles.label}>Their Player(s)</label>
                         <input
@@ -1483,6 +1477,7 @@ export default function App() {
                           }
                         />
                       </div>
+
                       <div style={styles.inputWrap}>
                         <label style={styles.label}>Format</label>
                         <select
@@ -1501,6 +1496,7 @@ export default function App() {
                           <option>Foursomes</option>
                         </select>
                       </div>
+
                       <div style={styles.inputWrap}>
                         <label style={styles.label}>Status</label>
                         <select
@@ -1783,15 +1779,32 @@ export default function App() {
                       />
                     </div>
 
-                    <div style={{ marginTop: "8px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        marginTop: "12px",
+                        flexWrap: "wrap"
+                      }}
+                    >
                       <span style={badgeStyle(selectedMatch)}>
                         {liveStatus(selectedMatch)}
                       </span>
+
+                      <button
+                        type="button"
+                        style={styles.dangerButton}
+                        onClick={() => deleteMatch(selectedMatch.id)}
+                      >
+                        Delete Match
+                      </button>
                     </div>
                   </div>
-                ) : null}
-              </>
-            )}
+                ) : (
+                  <div style={styles.card}>No match selected.</div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
