@@ -269,10 +269,13 @@ function liveStatus(match) {
     }
     return "Finished";
   }
+
   if (match.status === "Not Started") return "Not started";
+
   if (match.leader === "All Square") {
     return `All Square thru ${Math.max(match.currentHole - 1, 0)}`;
   }
+
   return `${match.leader} ${match.margin} up thru ${Math.max(
     match.currentHole - 1,
     0
@@ -488,6 +491,7 @@ export default function App() {
     const allSquare = matches.filter(
       (m) => m.status === "In Progress" && m.leader === "All Square"
     ).length;
+
     return { ourLeading, theirLeading, allSquare };
   }, [matches]);
 
@@ -503,10 +507,12 @@ export default function App() {
 
   const selectedMatch =
     matches.find((m) => m.id === selectedMatchId) || matches[0] || null;
+
   const isCaptain = !!user;
 
   async function saveFixtureField(key, value) {
     if (!isCaptain || !activeFixtureId) return;
+
     await setDoc(
       doc(db, "fixtures", activeFixtureId),
       { [key]: value, updatedAt: Date.now() },
@@ -518,7 +524,9 @@ export default function App() {
     if (!isCaptain || !activeFixtureId) return;
 
     const patch = { [key]: value };
+
     if (key === "leader" && value === "All Square") patch.margin = 0;
+
     if (key === "status" && value !== "Finished") {
       patch.finishedResult = "Not decided";
       patch.finishText = "";
@@ -578,6 +586,7 @@ export default function App() {
     defaultMatches(autoFormat).forEach((match) => {
       batch.set(doc(db, "fixtures", fixtureRef.id, "matches", match.id), match);
     });
+
     await batch.commit();
 
     setActiveFixtureId(fixtureRef.id);
@@ -603,13 +612,15 @@ export default function App() {
 
   async function logOutCaptain() {
     await signOut(auth);
-    setViewMode("spectator");
+    setViewMode("home");
   }
 
   async function setLeaderQuick(leader) {
     if (!selectedMatch || !isCaptain) return;
+
     await saveMatchField(selectedMatch.id, "status", "In Progress");
     await saveMatchField(selectedMatch.id, "leader", leader);
+
     if (
       leader !== "All Square" &&
       (!selectedMatch.margin || selectedMatch.margin === 0)
@@ -620,10 +631,12 @@ export default function App() {
 
   async function adjustHole(amount) {
     if (!selectedMatch || !isCaptain) return;
+
     const next = Math.min(
       19,
       Math.max(1, (selectedMatch.currentHole || 1) + amount)
     );
+
     await saveMatchField(selectedMatch.id, "currentHole", next);
   }
 
@@ -631,10 +644,12 @@ export default function App() {
     if (!selectedMatch || !isCaptain || selectedMatch.leader === "All Square") {
       return;
     }
+
     const next = Math.min(
       10,
       Math.max(1, (selectedMatch.margin || 1) + amount)
     );
+
     await saveMatchField(selectedMatch.id, "margin", next);
   }
 
@@ -776,19 +791,19 @@ export default function App() {
           <button
             style={{
               ...styles.chip,
+              ...(viewMode === "home" ? styles.activeChip : {})
+            }}
+            onClick={() => setViewMode("home")}
+          >
+            Home
+          </button>
+          <button
+            style={{
+              ...styles.chip,
               ...(viewMode === "spectator" ? styles.activeChip : {})
             }}
             onClick={() => setViewMode("spectator")}
           >
-<button
-  style={{
-    ...styles.chip,
-    ...(viewMode === "home" ? styles.activeChip : {})
-  }}
-  onClick={() => setViewMode("home")}
->
-  Home
-</button>
             Spectator View
           </button>
           <button
@@ -823,127 +838,156 @@ export default function App() {
           </div>
         ) : null}
 
-        <div style={{ ...styles.card, marginBottom: "16px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "12px",
-              alignItems: "center",
-              flexWrap: "wrap",
-              marginBottom: "12px"
-            }}
-          >
-            <div>
-              <h3 style={{ margin: 0, color: "#0f2d52" }}>Live Fixtures</h3>
+        {viewMode === "home" ? (
+          <div>
+            <div style={{ ...styles.card, marginBottom: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                  flexWrap: "wrap"
+                }}
+              >
+                <div>
+                  <h2 style={{ margin: 0, color: "#0f2d52" }}>
+                    Club Match Centre
+                  </h2>
+                  <div style={styles.small}>
+                    A cleaner home screen for members and captains.
+                  </div>
+                </div>
+                <img
+                  src={CREST_URL}
+                  alt="Club crest"
+                  style={{ width: 56, height: 56, objectFit: "contain" }}
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: "12px",
+                marginBottom: "16px"
+              }}
+            >
+              {fixtures.map((item) => {
+                const isActive = activeFixtureId === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      ...styles.card,
+                      padding: "14px",
+                      border: isActive
+                        ? "2px solid #2448d8"
+                        : "1px solid #e2e8f0",
+                      background: isActive ? "#eff6ff" : "white"
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        letterSpacing: "1.2px",
+                        textTransform: "uppercase",
+                        color: "#0f2d52"
+                      }}
+                    >
+                      {item.teamName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: 700,
+                        marginTop: "6px"
+                      }}
+                    >
+                      {(item.ourClub || "Portlaoise Golf Club")} vs{" "}
+                      {item.opposition}
+                    </div>
+                    <div style={{ ...styles.small, marginTop: "8px" }}>
+                      {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
+                    </div>
+                    <div style={{ ...styles.small, marginTop: "4px" }}>
+                      {item.status || "Live"}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        marginTop: "12px",
+                        flexWrap: "wrap"
+                      }}
+                    >
+                      <button
+                        type="button"
+                        style={styles.primaryButton}
+                        onClick={() => {
+                          setActiveFixtureId(item.id);
+                          setSelectedMatchId("");
+                          setViewMode("spectator");
+                        }}
+                      >
+                        Open Live View
+                      </button>
+                      {isCaptain ? (
+                        <button
+                          type="button"
+                          style={styles.button}
+                          onClick={() => {
+                            setActiveFixtureId(item.id);
+                            setSelectedMatchId("");
+                            setViewMode("captain");
+                          }}
+                        >
+                          Edit Fixture
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "12px",
+                marginBottom: "16px"
+              }}
+            >
+              <StatCard label="Total Live Fixtures" value={fixtures.length} />
+              <StatCard label="Selected Fixture Matches" value={matches.length} />
+            </div>
+
+            <div
+              style={{
+                ...styles.card,
+                background: "#eff6ff",
+                borderColor: "#bfdbfe"
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 700,
+                  color: "#0f2d52",
+                  marginBottom: "6px"
+                }}
+              >
+                App-style version
+              </div>
               <div style={styles.small}>
-                Tap a fixture card to switch between simultaneous team matches.
+                This gives you a cleaner home screen and structure for moving
+                toward an app-store-ready product.
               </div>
             </div>
           </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "12px"
-            }}
-          >
-            {fixtures.map((item) => {
-              const isActive = activeFixtureId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveFixtureId(item.id);
-                    setSelectedMatchId("");
-                  }}
-                  style={{
-                    ...styles.button,
-                    textAlign: "left",
-                    borderRadius: "18px",
-                    padding: "14px",
-                    background: isActive
-                      ? "linear-gradient(135deg, #0f2d52 0%, #2448d8 100%)"
-                      : "white",
-                    color: isActive ? "white" : "#0f172a",
-                    border: isActive
-                      ? "1px solid #0f2d52"
-                      : "1px solid #cbd5e1"
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "1.3px",
-                      textTransform: "uppercase",
-                      opacity: isActive ? 0.9 : 0.7
-                    }}
-                  >
-                    {item.teamName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      marginTop: "6px"
-                    }}
-                  >
-                    vs {item.opposition}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      fontSize: "14px",
-                      opacity: isActive ? 0.9 : 0.7
-                    }}
-                  >
-                    {item.venue} {item.date ? `• ${item.date}` : ""}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "6px",
-                      fontSize: "13px",
-                      opacity: isActive ? 0.9 : 0.7
-                    }}
-                  >
-                    {item.status || "Live"}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {viewMode === "home" ? (
-          <div>
-  <div style={{ ...styles.card, marginBottom: "16px" }}>
-    <h2 style={{ margin: 0 }}>Club Match Centre</h2>
-    <div style={styles.small}>
-      View all live fixtures below
-    </div>
-  </div>
-
-  <div style={{ display: "grid", gap: "12px" }}>
-    {fixtures.map((f) => (
-      <div key={f.id} style={styles.card}>
-        <div style={{ fontWeight: 700 }}>{f.teamName}</div>
-        <div>{f.ourClub} vs {f.opposition}</div>
-
-        <button
-          style={{ ...styles.primaryButton, marginTop: "10px" }}
-          onClick={() => {
-            setActiveFixtureId(f.id);
-            setViewMode("spectator");
-          }}
-        >
-          View Match
-        </button>
-      </div>
-    ))}
-  </div>
-</div>
+        ) : viewMode === "spectator" ? (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px" }}>
               <div
@@ -1008,7 +1052,6 @@ export default function App() {
                 value={`${liveTotals.us}-${liveTotals.them}`}
               />
             </div>
-
             <div
               style={{
                 display: "grid",
