@@ -400,14 +400,19 @@ function getFixtureSummary(matches = [], ourClub, opposition) {
   };
 }
 
-function HomeFixtureCard({ fixture, summary, isActive }) {
+function HomeFixtureCard({ fixture, summary, isActive, onClick }) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
         ...styles.card,
         padding: "14px",
         border: isActive ? `2px solid ${colors.royal}` : "1px solid #e2e8f0",
-        background: isActive ? colors.paleBlue : "white"
+        background: isActive ? colors.paleBlue : "white",
+        textAlign: "left",
+        cursor: "pointer",
+        width: "100%"
       }}
     >
       <div
@@ -479,7 +484,7 @@ function HomeFixtureCard({ fixture, summary, isActive }) {
         {summary.liveCount} live match{summary.liveCount === 1 ? "" : "es"} •{" "}
         {fixture.status || "Live"}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -602,15 +607,8 @@ export default function App() {
       matchesQuery,
       async (snap) => {
         if (snap.empty) {
-          const currentFormat = getFormatFromCompetition(fixture.teamName);
-          const batch = writeBatch(db);
-          defaultMatches(currentFormat).forEach((match) => {
-            batch.set(
-              doc(db, "fixtures", activeFixtureId, "matches", match.id),
-              match
-            );
-          });
-          await batch.commit();
+          setMatches([]);
+          setSelectedMatchId("");
           return;
         }
 
@@ -632,7 +630,7 @@ export default function App() {
       unsubFixture();
       unsubMatches();
     };
-  }, [activeFixtureId, fixture.teamName]);
+  }, [activeFixtureId]);
 
   const activeFixtureIndex = useMemo(
     () => fixtures.findIndex((f) => f.id === activeFixtureId),
@@ -781,15 +779,63 @@ export default function App() {
   }
 
   async function deleteMatch(matchId) {
-    if (!isCaptain || !activeFixtureId) return;
+    if (!isCaptain || !activeFixtureId || !matchId) return;
 
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this match?"
     );
     if (!confirmDelete) return;
 
-    await deleteDoc(doc(db, "fixtures", activeFixtureId, "matches", matchId));
-    setSelectedMatchId("");
+    try {
+      await deleteDoc(doc(db, "fixtures", activeFixtureId, "matches", matchId));
+
+      const remainingMatches = matches.filter((m) => m.id !== matchId);
+      setMatches(remainingMatches);
+      setSelectedMatchId(remainingMatches[0]?.id || "");
+
+      await setDoc(
+        doc(db, "fixtures", activeFixtureId),
+        { updatedAt: Date.now() },
+        { merge: true }
+      );
+    } catch (err) {
+      alert("Could not delete match.");
+      console.error("Delete match failed:", err);
+    }
+  }
+
+  async function deleteFixture() {
+    if (!isCaptain || !activeFixtureId) return;
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this entire fixture and all of its matches?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const matchesRef = collection(db, "fixtures", activeFixtureId, "matches");
+      const snap = await getDocs(matchesRef);
+
+      const batch = writeBatch(db);
+
+      snap.forEach((docSnap) => {
+        batch.delete(doc(db, "fixtures", activeFixtureId, "matches", docSnap.id));
+      });
+
+      batch.delete(doc(db, "fixtures", activeFixtureId));
+
+      await batch.commit();
+
+      const remainingFixtures = fixtures.filter((f) => f.id !== activeFixtureId);
+      const nextFixtureId = remainingFixtures[0]?.id || "";
+
+      setActiveFixtureId(nextFixtureId);
+      setSelectedMatchId("");
+      setScreen("home");
+    } catch (err) {
+      alert("Could not delete fixture.");
+      console.error("Delete fixture failed:", err);
+    }
   }
 
   async function createFixture() {
@@ -1177,6 +1223,11 @@ export default function App() {
                     getFixtureSummary([], item.ourClub, item.opposition)
                   }
                   isActive={item.id === activeFixtureId}
+                  onClick={() => {
+                    setActiveFixtureId(item.id);
+                    setSelectedMatchId("");
+                    setScreen("spectator");
+                  }}
                 />
               ))}
             </div>
@@ -1587,6 +1638,14 @@ export default function App() {
                       </button>
                     </div>
                   ))}
+
+                  <button
+                    type="button"
+                    style={{ ...styles.dangerButton, width: "100%", marginTop: "8px" }}
+                    onClick={deleteFixture}
+                  >
+                    Delete Fixture
+                  </button>
                 </div>
 
                 <div style={styles.card}>
