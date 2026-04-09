@@ -133,7 +133,7 @@ const styles = {
     color: "#0f172a"
   },
   shell: {
-    maxWidth: "1220px",
+    maxWidth: "1240px",
     margin: "0 auto"
   },
   card: {
@@ -508,12 +508,10 @@ export default function App() {
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
 
   const [fixtureSummaries, setFixtureSummaries] = useState({});
+  const [tvHighlightIndex, setTvHighlightIndex] = useState(0);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (nextUser) =>
-      setUser(nextUser || null)
-    );
-    return () => unsub();
+    return onAuthStateChanged(auth, (nextUser) => setUser(nextUser || null));
   }, []);
 
   useEffect(() => {
@@ -605,7 +603,7 @@ export default function App() {
 
     const unsubMatches = onSnapshot(
       matchesQuery,
-      async (snap) => {
+      (snap) => {
         if (snap.empty) {
           setMatches([]);
           setSelectedMatchId("");
@@ -631,6 +629,14 @@ export default function App() {
       unsubMatches();
     };
   }, [activeFixtureId]);
+
+  useEffect(() => {
+    if (screen !== "tv" || matches.length === 0) return;
+    const interval = setInterval(() => {
+      setTvHighlightIndex((prev) => (prev + 1) % matches.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [screen, matches.length]);
 
   const activeFixtureIndex = useMemo(
     () => fixtures.findIndex((f) => f.id === activeFixtureId),
@@ -712,16 +718,13 @@ export default function App() {
   const tickerItems = useMemo(() => {
     return fixtures.map((fx) => {
       const summary = fixtureSummaries[fx.id];
-      if (!summary) {
-        return `${fx.teamName}: live`;
-      }
+      if (!summary) return `${fx.teamName}: live`;
       return `${fx.teamName}: ${summary.official.us}-${summary.official.them} official | ${summary.live.us}-${summary.live.them} live`;
     });
   }, [fixtures, fixtureSummaries]);
 
   async function saveFixtureField(key, value) {
     if (!isCaptain || !activeFixtureId) return;
-
     await setDoc(
       doc(db, "fixtures", activeFixtureId),
       { [key]: value, updatedAt: Date.now() },
@@ -735,7 +738,6 @@ export default function App() {
     const patch = { [key]: value };
 
     if (key === "leader" && value === "All Square") patch.margin = 0;
-
     if (key === "status" && value !== "Finished") {
       patch.finishedResult = "Not decided";
       patch.finishText = "";
@@ -855,7 +857,6 @@ export default function App() {
     defaultMatches(autoFormat).forEach((match) => {
       batch.set(doc(db, "fixtures", fixtureRef.id, "matches", match.id), match);
     });
-
     await batch.commit();
 
     setActiveFixtureId(fixtureRef.id);
@@ -901,12 +902,10 @@ export default function App() {
 
   async function adjustHole(amount) {
     if (!selectedMatch || !isCaptain) return;
-
     const next = Math.min(
       19,
       Math.max(1, (selectedMatch.currentHole || 1) + amount)
     );
-
     await saveMatchField(selectedMatch.id, "currentHole", next);
   }
 
@@ -914,12 +913,10 @@ export default function App() {
     if (!selectedMatch || !isCaptain || selectedMatch.leader === "All Square") {
       return;
     }
-
     const next = Math.min(
       10,
       Math.max(1, (selectedMatch.margin || 1) + amount)
     );
-
     await saveMatchField(selectedMatch.id, "margin", next);
   }
 
@@ -954,6 +951,118 @@ export default function App() {
       <div style={styles.page}>
         <div style={styles.shell}>
           <div style={styles.card}>Loading Portlaoise Interclub App...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === "tv") {
+    return (
+      <div
+        style={{
+          background: colors.navy,
+          minHeight: "100vh",
+          color: "white",
+          padding: "24px",
+          fontFamily: "Arial, sans-serif"
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <div style={{ fontSize: "18px", opacity: 0.85 }}>{fixture.teamName}</div>
+          <div style={{ fontSize: "54px", fontWeight: 800, marginTop: "8px" }}>
+            {fixture.ourClub} {liveTotals.us} - {liveTotals.them} {fixture.opposition}
+          </div>
+          <div style={{ fontSize: "24px", marginTop: "10px", color: "#dbeafe" }}>
+            {liveOverallText}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "16px",
+            marginBottom: "24px"
+          }}
+        >
+          <div
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              borderRadius: "18px",
+              padding: "20px"
+            }}
+          >
+            <div style={{ fontSize: "18px", opacity: 0.8 }}>Official Score</div>
+            <div style={{ fontSize: "46px", fontWeight: 800 }}>
+              {totals.us}-{totals.them}
+            </div>
+          </div>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              borderRadius: "18px",
+              padding: "20px"
+            }}
+          >
+            <div style={{ fontSize: "18px", opacity: 0.8 }}>Live Matches</div>
+            <div style={{ fontSize: "46px", fontWeight: 800 }}>{totals.live}</div>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gap: "14px" }}>
+          {matches.map((m, i) => (
+            <div
+              key={m.id}
+              style={{
+                background:
+                  i === tvHighlightIndex
+                    ? "linear-gradient(135deg, #2448d8 0%, #3b82f6 100%)"
+                    : "rgba(255,255,255,0.08)",
+                borderRadius: "18px",
+                padding: "18px 22px",
+                transition: "all 0.3s ease"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  alignItems: "center"
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "18px", fontWeight: 700 }}>
+                    Match {i + 1}
+                  </div>
+                  <div style={{ fontSize: "24px", marginTop: "4px" }}>
+                    {m.ourPlayers} vs {m.theirPlayers}
+                  </div>
+                </div>
+                <div style={{ fontSize: "26px", fontWeight: 800 }}>
+                  {liveStatus(m)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: "24px", textAlign: "center" }}>
+          <button
+            type="button"
+            onClick={() => setScreen("home")}
+            style={{
+              padding: "12px 18px",
+              borderRadius: "12px",
+              border: "none",
+              background: "white",
+              color: colors.navy,
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            Exit TV Mode
+          </button>
         </div>
       </div>
     );
@@ -1154,6 +1263,15 @@ export default function App() {
             onClick={() => setScreen("captain")}
           >
             Captain
+          </button>
+          <button
+            style={{
+              ...styles.chip,
+              ...(screen === "tv" ? styles.activeChip : {})
+            }}
+            onClick={() => setScreen("tv")}
+          >
+            TV Mode
           </button>
           <button style={styles.button} onClick={copySummary}>
             Copy Summary
