@@ -111,7 +111,6 @@ const colors = {
   navy: "#0f2d52",
   royal: "#2448d8",
   gold: "#d4a64a",
-  goldSoft: "#f4e3b2",
   paleGold: "#fff8e7",
   paleBlue: "#eff6ff",
   borderBlue: "#bfdbfe",
@@ -129,7 +128,7 @@ const styles = {
   page: {
     minHeight: "100vh",
     background: colors.light,
-    padding: "14px",
+    padding: "12px",
     fontFamily: "Arial, sans-serif",
     color: "#0f172a"
   },
@@ -174,7 +173,8 @@ const styles = {
     borderRadius: "12px",
     fontSize: "16px",
     background: "white",
-    width: "100%"
+    width: "100%",
+    boxSizing: "border-box"
   },
   button: {
     padding: "12px 14px",
@@ -532,6 +532,18 @@ export default function App() {
 
   const [fixtureSummaries, setFixtureSummaries] = useState({});
   const [tvHighlightIndex, setTvHighlightIndex] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const isMobile = windowWidth < 900;
+  const isSmallMobile = windowWidth < 560;
 
   useEffect(() => {
     return onAuthStateChanged(auth, (nextUser) => setUser(nextUser || null));
@@ -986,7 +998,7 @@ export default function App() {
           background: colors.navy,
           minHeight: "100vh",
           color: "white",
-          padding: "24px",
+          padding: isMobile ? "16px" : "24px",
           fontFamily: "Arial, sans-serif"
         }}
       >
@@ -995,8 +1007,8 @@ export default function App() {
             src={CREST_URL}
             alt="Portlaoise Golf Club crest"
             style={{
-              width: "110px",
-              height: "110px",
+              width: isMobile ? "88px" : "110px",
+              height: isMobile ? "88px" : "110px",
               objectFit: "contain",
               marginBottom: "12px",
               filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.25))"
@@ -1005,7 +1017,7 @@ export default function App() {
 
           <div
             style={{
-              fontSize: "18px",
+              fontSize: isMobile ? "14px" : "18px",
               opacity: 0.9,
               color: "#f8e7b9",
               letterSpacing: "1.2px",
@@ -1016,11 +1028,24 @@ export default function App() {
             {fixture.teamName}
           </div>
 
-          <div style={{ fontSize: "54px", fontWeight: 800, marginTop: "8px" }}>
+          <div
+            style={{
+              fontSize: isMobile ? "28px" : "54px",
+              fontWeight: 800,
+              marginTop: "8px",
+              lineHeight: 1.15
+            }}
+          >
             {fixture.ourClub} {liveTotals.us} - {liveTotals.them} {fixture.opposition}
           </div>
 
-          <div style={{ fontSize: "24px", marginTop: "10px", color: "#f8e7b9" }}>
+          <div
+            style={{
+              fontSize: isMobile ? "18px" : "24px",
+              marginTop: "10px",
+              color: "#f8e7b9"
+            }}
+          >
             {liveOverallText}
           </div>
         </div>
@@ -1028,7 +1053,7 @@ export default function App() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
             gap: "16px",
             marginBottom: "24px"
           }}
@@ -1044,7 +1069,7 @@ export default function App() {
             <div style={{ fontSize: "18px", opacity: 0.8, color: "#f8e7b9" }}>
               Official Score
             </div>
-            <div style={{ fontSize: "46px", fontWeight: 800 }}>
+            <div style={{ fontSize: isMobile ? "34px" : "46px", fontWeight: 800 }}>
               {totals.us}-{totals.them}
             </div>
           </div>
@@ -1060,49 +1085,53 @@ export default function App() {
             <div style={{ fontSize: "18px", opacity: 0.8, color: "#f8e7b9" }}>
               Live Matches
             </div>
-            <div style={{ fontSize: "46px", fontWeight: 800 }}>{totals.live}</div>
+            <div style={{ fontSize: isMobile ? "34px" : "46px", fontWeight: 800 }}>
+              {totals.live}
+            </div>
           </div>
         </div>
 
         <div style={{ display: "grid", gap: "14px" }}>
           {matches.map((m, i) => (
             <div
+                                   <div
               key={m.id}
               style={{
                 background:
                   i === tvHighlightIndex
-                    ? `linear-gradient(135deg, ${colors.gold} 0%, #e7c46a 100%)`
-                    : "rgba(255,255,255,0.08)",
-                color: i === tvHighlightIndex ? colors.navy : "white",
-                borderRadius: "18px",
-                padding: "18px 22px",
-                transition: "all 0.3s ease",
+                    ? "rgba(212,166,74,0.25)"
+                    : "rgba(255,255,255,0.06)",
+                borderRadius: "16px",
+                padding: "16px",
                 border:
                   i === tvHighlightIndex
                     ? `2px solid ${colors.gold}`
-                    : "1px solid rgba(255,255,255,0.12)"
+                    : "1px solid rgba(255,255,255,0.1)",
+                transition: "all 0.3s ease"
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                  alignItems: "center"
+                  fontSize: isMobile ? "16px" : "20px",
+                  fontWeight: 700,
+                  marginBottom: "6px"
                 }}
               >
-                <div>
-                  <div style={{ fontSize: "18px", fontWeight: 700 }}>
-                    Match {i + 1}
-                  </div>
-                  <div style={{ fontSize: "24px", marginTop: "4px" }}>
-                    {m.ourPlayers} vs {m.theirPlayers}
-                  </div>
-                </div>
+                Match {i + 1}
+              </div>
 
-                <div style={{ fontSize: "26px", fontWeight: 800 }}>
-                  {liveStatus(m)}
-                </div>
+              <div style={{ fontSize: isMobile ? "15px" : "18px" }}>
+                {m.ourPlayers} vs {m.theirPlayers}
+              </div>
+
+              <div
+                style={{
+                  marginTop: "6px",
+                  fontSize: isMobile ? "14px" : "16px",
+                  color: "#f8e7b9"
+                }}
+              >
+                {liveStatus(m)}
               </div>
             </div>
           ))}
@@ -1110,17 +1139,8 @@ export default function App() {
 
         <div style={{ marginTop: "24px", textAlign: "center" }}>
           <button
-            type="button"
+            style={styles.button}
             onClick={() => setScreen("home")}
-            style={{
-              padding: "12px 18px",
-              borderRadius: "12px",
-              border: `1px solid ${colors.gold}`,
-              background: "white",
-              color: colors.navy,
-              fontWeight: 700,
-              cursor: "pointer"
-            }}
           >
             Exit TV Mode
           </button>
@@ -1128,1452 +1148,10 @@ export default function App() {
       </div>
     );
   }
-
   return (
     <div style={styles.page}>
-      <style>{`
-        @keyframes tickerScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
-
       <div style={styles.shell}>
-        <div
-          style={{
-            ...styles.card,
-            background: `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`,
-            color: "white",
-            position: "relative",
-            overflow: "hidden",
-            marginBottom: "16px",
-            border: `1px solid ${colors.gold}`
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: "-20px",
-              top: "-10px",
-              opacity: 0.08,
-              transform: "scale(1.8)"
-            }}
-          >
-            <img
-              src={CREST_URL}
-              alt="Portlaoise Golf Club crest watermark"
-              style={{ width: 180 }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              position: "relative",
-              zIndex: 1
-            }}
-          >
-            <div
-              style={{
-                width: "74px",
-                height: "74px",
-                background: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                borderRadius: "18px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "8px",
-                flexShrink: 0
-              }}
-            >
-              <img
-                src={CREST_URL}
-                alt="Portlaoise Golf Club crest"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain"
-                }}
-              />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  letterSpacing: "1.8px",
-                  textTransform: "uppercase",
-                  opacity: 0.92
-                }}
-              >
-                Portlaoise Golf Club
-              </div>
-              <h1 style={{ ...styles.title, color: "white", marginTop: "6px" }}>
-                Live Interclub Web App
-              </h1>
-              <p
-                style={{
-                  color: "rgba(255,255,255,0.95)",
-                  marginTop: "8px",
-                  marginBottom: 0,
-                  maxWidth: "900px",
-                  lineHeight: 1.45
-                }}
-              >
-                Best of luck to all Portlaoise teams, players and managers.
-                Thank you to all our supporters. Captains Betty and Tiernan,
-                and President Eddie.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            ...styles.card,
-            padding: "0",
-            overflow: "hidden",
-            borderColor: colors.gold,
-            background: colors.paleGold,
-            marginBottom: "16px"
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              minHeight: "48px"
-            }}
-          >
-            <div
-              style={{
-                background: colors.navy,
-                color: "white",
-                fontWeight: 700,
-                padding: "14px 16px",
-                flexShrink: 0
-              }}
-            >
-              LIVE
-            </div>
-            <div
-              style={{
-                overflow: "hidden",
-                width: "100%"
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  width: "max-content",
-                  animation: "tickerScroll 28s linear infinite"
-                }}
-              >
-                {[...tickerItems, ...tickerItems].map((item, index) => (
-                  <div
-                    key={`${item}-${index}`}
-                    style={{
-                      padding: "0 24px",
-                      lineHeight: "48px",
-                      whiteSpace: "nowrap",
-                      fontWeight: 700,
-                      color: colors.navy
-                    }}
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginBottom: "16px",
-            flexWrap: "wrap"
-          }}
-        >
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "home" ? styles.activeChip : {})
-            }}
-            onClick={() => setScreen("home")}
-          >
-            Home
-          </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "spectator" ? styles.activeChip : {})
-            }}
-            onClick={() => setScreen("spectator")}
-          >
-            Spectator
-          </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "captain" ? styles.activeChip : {})
-            }}
-            onClick={() => setScreen("captain")}
-          >
-            Captain
-          </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "tv" ? styles.activeChip : {})
-            }}
-            onClick={() => setScreen("tv")}
-          >
-            TV Mode
-          </button>
-          <button style={styles.button} onClick={copySummary}>
-            Copy Summary
-          </button>
-          {isCaptain ? (
-            <button style={styles.button} onClick={logOutCaptain}>
-              Log Out
-            </button>
-          ) : null}
-        </div>
-
-        {error ? (
-          <div
-            style={{
-              ...styles.card,
-              marginBottom: "16px",
-              borderColor: "#fecaca",
-              color: "#991b1b"
-            }}
-          >
-            {error}
-          </div>
-        ) : null}
-
-        {screen === "home" ? (
-          <div>
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <div>
-                  <h2 style={{ margin: 0, color: colors.navy }}>
-                    Club Match Centre
-                  </h2>
-                  <div style={styles.small}>
-                    Live fixtures and scores across all Portlaoise teams.
-                  </div>
-                </div>
-                <img
-                  src={CREST_URL}
-                  alt="Club crest"
-                  style={{ width: 56, height: 56, objectFit: "contain" }}
-                />
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: "12px",
-                marginBottom: "16px"
-              }}
-            >
-              {fixtures.map((item) => (
-                <HomeFixtureCard
-                  key={item.id}
-                  fixture={item}
-                  summary={
-                    fixtureSummaries[item.id] ||
-                    getFixtureSummary([], item.ourClub, item.opposition)
-                  }
-                  isActive={item.id === activeFixtureId}
-                  onClick={() => {
-                    setActiveFixtureId(item.id);
-                    setSelectedMatchId("");
-                  }}
-                />
-              ))}
-            </div>
-
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                border: `1px solid ${colors.gold}`,
-                background: "linear-gradient(180deg, #fffdf7 0%, white 100%)"
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                  marginBottom: "14px"
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "1.4px",
-                      textTransform: "uppercase",
-                      color: colors.gold
-                    }}
-                  >
-                    Featured Fixture
-                  </div>
-                  <h2 style={{ margin: "6px 0 4px 0", color: colors.navy }}>
-                    {fixture.teamName}
-                  </h2>
-                  <div style={styles.small}>
-                    {fixture.ourClub} vs {fixture.opposition}
-                  </div>
-                  <div style={styles.small}>
-                    {fixture.venue} {fixture.date ? `• ${fixture.date}` : ""}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <button
-                    type="button"
-                    style={styles.button}
-                    onClick={() => setScreen("spectator")}
-                  >
-                    Open Spectator View
-                  </button>
-                  <button
-                    type="button"
-                    style={styles.button}
-                    onClick={() => setScreen("tv")}
-                  >
-                    Open TV Mode
-                  </button>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: "12px",
-                  marginBottom: "16px"
-                }}
-              >
-                <div
-                  style={{
-                    background: colors.paleBlue,
-                    border: `1px solid ${colors.borderBlue}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Official Score</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {totals.us}-{totals.them}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: colors.paleGold,
-                    border: `1px solid ${colors.gold}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Live Overall</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {liveTotals.us}-{liveTotals.them}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: "#ffffff",
-                    border: `1px solid ${colors.gold}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Live Matches</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {totals.live}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: "14px",
-                  borderRadius: "14px",
-                  background: colors.paleGold,
-                  border: `1px solid ${colors.gold}`,
-                  marginBottom: "14px"
-                }}
-              >
-                <div style={{ fontWeight: 700, color: colors.navy }}>{liveOverallText}</div>
-                <div style={{ ...styles.small, marginTop: "4px" }}>
-                  Portlaoise leading: {liveMatchSummary.ourLeading} • Opposition leading:{" "}
-                  {liveMatchSummary.theirLeading} • All square: {liveMatchSummary.allSquare}
-                </div>
-              </div>
-
-              <div style={{ display: "grid", gap: "10px" }}>
-                {matches.map((match, index) => (
-                  <div
-                    key={match.id}
-                    style={{
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "14px",
-                      padding: "12px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "12px",
-                      flexWrap: "wrap"
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 700, color: colors.navy }}>
-                        Match {index + 1}
-                      </div>
-                      <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
-                      <div style={styles.small}>vs {match.theirPlayers || "TBC"}</div>
-                    </div>
-
-                    <span style={badgeStyle(match)}>{liveStatus(match)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px"
-              }}
-            >
-              <StatCard label="Total Fixtures" value={fixtures.length} />
-              <StatCard label="Current Fixture Matches" value={matches.length} />
-            </div>
-          </div>
-        ) : screen === "spectator" ? (
-          <div>
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "1.5px",
-                      color: colors.navy
-                    }}
-                  >
-                    {fixture.teamName} • {fixture.competition}
-                  </div>
-                  <h2 style={{ margin: "6px 0 8px 0", color: colors.navy }}>
-                    {fixture.ourClub} vs {fixture.opposition}
-                  </h2>
-                  <div style={styles.small}>
-                    {fixture.venue} {fixture.date ? `• ${fixture.date}` : ""}
-                  </div>
-                  <div style={styles.small}>
-                    Captain: {fixture.captain || "TBC"}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  <button
-                    type="button"
-                    style={styles.button}
-                    onClick={() => setScreen("home")}
-                  >
-                    Back Home
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ marginTop: "14px" }}>
-                <label
-                  style={{ ...styles.label, marginBottom: "6px", display: "block" }}
-                >
-                  Switch Fixture
-                </label>
-                <select
-                  style={styles.select}
-                  value={activeFixtureId}
-                  onChange={(e) => {
-                    setActiveFixtureId(e.target.value);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  {fixtures.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.teamName} vs {item.opposition}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  marginTop: "12px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <button
-                  type="button"
-                  style={styles.button}
-                  disabled={!previousFixture}
-                  onClick={() => {
-                    if (!previousFixture) return;
-                    setActiveFixtureId(previousFixture.id);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  ← Previous Fixture
-                </button>
-                <button
-                  type="button"
-                  style={styles.button}
-                  disabled={!nextFixture}
-                  onClick={() => {
-                    if (!nextFixture) return;
-                    setActiveFixtureId(nextFixture.id);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  Next Fixture →
-                </button>
-              </div>
-            </div>
-
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                overflowX: "auto",
-                whiteSpace: "nowrap",
-                borderColor: colors.gold,
-                background: "#fffdf7"
-              }}
-            >
-              <div style={{ display: "flex", gap: "10px", minWidth: "max-content" }}>
-                {fixtures.map((item) => {
-                  const isActive = item.id === activeFixtureId;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveFixtureId(item.id);
-                        setSelectedMatchId("");
-                      }}
-                      style={{
-                        ...styles.button,
-                        minWidth: "240px",
-                        textAlign: "left",
-                        borderRadius: "16px",
-                        background: isActive
-                          ? `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`
-                          : "white",
-                        color: isActive ? "white" : "#0f172a",
-                        border: isActive
-                          ? `1px solid ${colors.gold}`
-                          : "1px solid #cbd5e1",
-                        boxShadow: isActive
-                          ? "0 6px 18px rgba(212,166,74,0.18)"
-                          : "none"
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          letterSpacing: "1.2px",
-                          textTransform: "uppercase",
-                          opacity: isActive ? 0.95 : 0.7
-                        }}
-                      >
-                        {item.teamName}
-                      </div>
-                      <div style={{ fontWeight: 700, marginTop: "6px" }}>
-                        vs {item.opposition}
-                      </div>
-                      <div
-                        style={{
-                          marginTop: "6px",
-                          fontSize: "13px",
-                          opacity: isActive ? 0.95 : 0.7
-                        }}
-                      >
-                        {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                marginBottom: "16px",
-                flexWrap: "wrap"
-              }}
-            >
-              {fixtures.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  style={{
-                    ...styles.chip,
-                    ...(item.id === activeFixtureId ? styles.activeChip : {})
-                  }}
-                  onClick={() => {
-                    setActiveFixtureId(item.id);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  {item.teamName}
-                </button>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "12px"
-              }}
-            >
-              <StatCard
-                label="Official Score"
-                value={`${totals.us}-${totals.them}`}
-              />
-              <StatCard
-                label="Live Overall"
-                value={`${liveTotals.us}-${liveTotals.them}`}
-              />
-            </div>
-
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                background: colors.paleGold,
-                borderColor: colors.gold
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: colors.navy,
-                  marginBottom: "6px"
-                }}
-              >
-                {liveOverallText}
-              </div>
-              <div style={styles.small}>
-                Portlaoise leading: {liveMatchSummary.ourLeading} • Opposition
-                leading: {liveMatchSummary.theirLeading} • All square:{" "}
-                {liveMatchSummary.allSquare}
-              </div>
-            </div>
-
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <h3 style={{ marginTop: 0, color: colors.navy }}>Matches</h3>
-              {matches.map((match, index) => (
-                <div
-                  key={match.id}
-                  style={{
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "16px",
-                    padding: "14px",
-                    marginBottom: "10px"
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "10px",
-                      alignItems: "center"
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 700, marginBottom: "4px" }}>
-                        Match {index + 1}
-                      </div>
-                      <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
-                      <div style={styles.small}>
-                        vs {match.theirPlayers || "TBC"}
-                      </div>
-                      <div style={{ ...styles.small, marginTop: "4px" }}>
-                        {match.format}
-                      </div>
-                    </div>
-                    <span style={badgeStyle(match)}>{liveStatus(match)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : !isCaptain ? (
-          <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-            <h3 style={{ marginTop: 0, color: colors.navy }}>Captain Login</h3>
-            <form onSubmit={signInCaptain}>
-              <div style={styles.inputWrap}>
-                <label style={styles.label}>Email</label>
-                <input
-                  style={styles.input}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div style={styles.inputWrap}>
-                <label style={styles.label}>Password</label>
-                <input
-                  style={styles.input}
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <button style={styles.primaryButton} disabled={authLoading}>
-                {authLoading ? "Signing In..." : "Sign In"}
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div>
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <h3 style={{ marginTop: 0, color: colors.navy }}>
-                Create New Fixture
-              </h3>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "12px"
-                }}
-              >
-                <div style={styles.inputWrap}>
-                  <label style={styles.label}>Team</label>
-                  <select
-                    style={styles.select}
-                    value={newFixtureTeam}
-                    onChange={(e) => setNewFixtureTeam(e.target.value)}
-                  >
-                    {TEAM_OPTIONS.map((team) => (
-                      <option key={team} value={team}>
-                        {team}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={styles.inputWrap}>
-                  <label style={styles.label}>Opposition</label>
-                  <input
-                    style={styles.input}
-                    value={newFixtureOpposition}
-                    onChange={(e) => setNewFixtureOpposition(e.target.value)}
-                    placeholder="Opposition name"
-                  />
-                </div>
-
-                <div style={{ display: "flex", alignItems: "end" }}>
-                  <button
-                    type="button"
-                    style={{ ...styles.primaryButton, width: "100%" }}
-                    onClick={createFixture}
-                  >
-                    Create Fixture
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "320px 1fr",
-                gap: "16px"
-              }}
-            >
-              <div>
-                <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>Fixtures</h3>
-                  {fixtures.map((item) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        border:
-                          activeFixtureId === item.id
-                            ? `2px solid ${colors.gold}`
-                            : "1px solid #e2e8f0",
-                        borderRadius: "14px",
-                        padding: "12px",
-                        marginBottom: "10px",
-                        background:
-                          activeFixtureId === item.id ? "#fffdf7" : "white"
-                      }}
-                    >
-                      <button
-                        type="button"
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          textAlign: "left",
-                          padding: 0,
-                          cursor: "pointer",
-                          width: "100%"
-                        }}
-                        onClick={() => {
-                          setActiveFixtureId(item.id);
-                          setSelectedMatchId("");
-                        }}
-                      >
-                        <div style={{ fontWeight: 700 }}>{item.teamName}</div>
-                        <div style={styles.small}>vs {item.opposition}</div>
-                        <div style={styles.small}>{item.date || "No date set"}</div>
-                      </button>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    style={{ ...styles.dangerButton, width: "100%", marginTop: "8px" }}
-                    onClick={deleteFixture}
-                  >
-                    Delete Fixture
-                  </button>
-                </div>
-
-                <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>
-                    Match List
-                  </h3>
-                  <button
-                    type="button"
-                    style={{ ...styles.primaryButton, width: "100%", marginBottom: "12px" }}
-                    onClick={addMatch}
-                  >
-                    Add Match
-                  </button>
-
-                  {matches.map((match, index) => (
-                    <div
-                      key={match.id}
-                      style={{
-                        border:
-                          selectedMatch?.id === match.id
-                            ? `2px solid ${colors.gold}`
-                            : "1px solid #e2e8f0",
-                        borderRadius: "14px",
-                        padding: "12px",
-                        marginBottom: "10px",
-                        background:
-                          selectedMatch?.id === match.id ? "#fffdf7" : "white"
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMatchId(match.id)}
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          textAlign: "left",
-                          padding: 0,
-                          cursor: "pointer",
-                          width: "100%"
-                        }}
-                      >
-                        <div style={{ fontWeight: 700 }}>Match {index + 1}</div>
-                        <div style={styles.small}>
-                          {match.ourPlayers || "TBC"} vs{" "}
-                          {match.theirPlayers || "TBC"}
-                        </div>
-                        <div style={{ marginTop: "6px" }}>
-                          <span style={badgeStyle(match)}>{liveStatus(match)}</span>
-                        </div>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>
-                    Fixture Setup
-                  </h3>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "12px"
-                    }}
-                  >
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Team Name</label>
-                      <select
-                        style={styles.select}
-                        value={fixture.teamName}
-                        onChange={(e) =>
-                          saveFixtureField("teamName", e.target.value)
-                        }
-                      >
-                        {TEAM_OPTIONS.map((team) => (
-                          <option key={team} value={team}>
-                            {team}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Competition</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.competition}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            competition: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("competition", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Date</label>
-                      <input
-                        style={styles.input}
-                        type="date"
-                        value={fixture.date}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            date: e.target.value
-                          }))
-                        }
-                        onBlur={(e) => saveFixtureField("date", e.target.value)}
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Opposition</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.opposition}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            opposition: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("opposition", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Venue</label>
-                      <select
-                        style={styles.select}
-                        value={fixture.venue}
-                        onChange={(e) => {
-                          setFixture((prev) => ({
-                            ...prev,
-                            venue: e.target.value
-                          }));
-                          saveFixtureField("venue", e.target.value);
-                        }}
-                      >
-                        <option>Home</option>
-                        <option>Away</option>
-                        <option>Neutral</option>
-                      </select>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Captain / Manager</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.captain}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            captain: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("captain", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    ...styles.card,
-                    background: colors.paleGold,
-                    borderColor: colors.gold,
-                    marginBottom: "16px"
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      color: colors.navy,
-                      marginBottom: "6px"
-                    }}
-                  >
-                    {liveOverallText}
-                  </div>
-                  <div style={styles.small}>
-                    Live overall: {liveTotals.us}-{liveTotals.them} • Portlaoise
-                    leading: {liveMatchSummary.ourLeading} • Opposition leading:{" "}
-                    {liveMatchSummary.theirLeading} • All square:{" "}
-                    {liveMatchSummary.allSquare}
-                  </div>
-                </div>
-
-                {selectedMatch ? (
-                  <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
-                    <h3 style={{ marginTop: 0, color: colors.navy }}>
-                      Edit Selected Match
-                    </h3>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "12px"
-                      }}
-                    >
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Our Player(s)</label>
-                        <input
-                          style={styles.input}
-                          value={selectedMatch.ourPlayers}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, ourPlayers: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "ourPlayers",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Their Player(s)</label>
-                        <input
-                          style={styles.input}
-                          value={selectedMatch.theirPlayers}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, theirPlayers: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "theirPlayers",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Format</label>
-                        <select
-                          style={styles.select}
-                          value={selectedMatch.format}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "format",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option>Singles</option>
-                          <option>Fourball</option>
-                          <option>Foursomes</option>
-                        </select>
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Status</label>
-                        <select
-                          style={styles.select}
-                          value={selectedMatch.status}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "status",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option>Not Started</option>
-                          <option>In Progress</option>
-                          <option>Finished</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                      <div style={{ ...styles.label, marginBottom: "8px" }}>
-                        Quick Score Buttons
-                      </div>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr 1fr",
-                          gap: "10px"
-                        }}
-                      >
-                        <button
-                          type="button"
-                          style={styles.softButton}
-                          onClick={() => setLeaderQuick("Our team")}
-                        >
-                          Our Team Up
-                        </button>
-                        <button
-                          type="button"
-                          style={styles.button}
-                          onClick={() => setLeaderQuick("All Square")}
-                        >
-                          All Square
-                        </button>
-                        <button
-                          type="button"
-                          style={styles.softButton}
-                          onClick={() => setLeaderQuick("Their team")}
-                        >
-                          Their Team Up
-                        </button>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "12px",
-                        marginBottom: "10px"
-                      }}
-                    >
-                      <div
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "16px",
-                          padding: "14px"
-                        }}
-                      >
-                        <div style={{ ...styles.label, marginBottom: "10px" }}>
-                          Current Hole
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "10px"
-                          }}
-                        >
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustHole(-1)}
-                          >
-                            -
-                          </button>
-                          <div style={{ fontSize: "28px", fontWeight: 700 }}>
-                            {selectedMatch.currentHole}
-                          </div>
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustHole(1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "16px",
-                          padding: "14px"
-                        }}
-                      >
-                        <div style={{ ...styles.label, marginBottom: "10px" }}>
-                          Margin
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "10px"
-                          }}
-                        >
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustMargin(-1)}
-                          >
-                            -
-                          </button>
-                          <div style={{ fontSize: "28px", fontWeight: 700 }}>
-                            {selectedMatch.leader === "All Square"
-                              ? 0
-                              : selectedMatch.margin}
-                          </div>
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustMargin(1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                      <div style={{ ...styles.label, marginBottom: "8px" }}>
-                        Match Result
-                      </div>
-
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr 1fr",
-                          gap: "10px",
-                          marginBottom: "10px"
-                        }}
-                      >
-                        <button
-                          type="button"
-                          style={styles.primaryButton}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Our team won"
-                            )
-                          }
-                        >
-                          Our Team Won
-                        </button>
-                        <button
-                          type="button"
-                          style={styles.button}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Their team won"
-                            )
-                          }
-                        >
-                          Their Team Won
-                        </button>
-                        <button
-                          type="button"
-                          style={styles.softButton}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Halved"
-                            )
-                          }
-                        >
-                          Halved
-                        </button>
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>
-                          Choose Standard Result
-                        </label>
-                        <select
-                          style={styles.select}
-                          value={selectedMatch.finishText}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishText",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">Select a result</option>
-                          {STANDARD_RESULTS.map((result) => (
-                            <option key={result} value={result}>
-                              {result}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>
-                          Or Type Final Score Manually
-                        </label>
-                        <input
-                          style={styles.input}
-                          placeholder="e.g. 3&2, 4&3, 1 up"
-                          value={selectedMatch.finishText}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, finishText: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishText",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        style={{ ...styles.primaryButton, marginTop: "10px" }}
-                        onClick={() =>
-                          saveMatchField(selectedMatch.id, "status", "Finished")
-                        }
-                      >
-                        Mark Match as Finished
-                      </button>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Notes</label>
-                      <input
-                        style={styles.input}
-                        value={selectedMatch.notes}
-                        onChange={(e) =>
-                          setMatches((prev) =>
-                            prev.map((m) =>
-                              m.id === selectedMatch.id
-                                ? { ...m, notes: e.target.value }
-                                : m
-                            )
-                          )
-                        }
-                        onBlur={(e) =>
-                          saveMatchField(
-                            selectedMatch.id,
-                            "notes",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        marginTop: "12px",
-                        flexWrap: "wrap"
-                      }}
-                    >
-                      <span style={badgeStyle(selectedMatch)}>
-                        {liveStatus(selectedMatch)}
-                      </span>
-
-                      <button
-                        type="button"
-                        style={styles.dangerButton}
-                        onClick={() => deleteMatch(selectedMatch.id)}
-                      >
-                        Delete Match
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.card}>No match selected.</div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <h1 style={styles.title}>App Running</h1>
       </div>
     </div>
   );
