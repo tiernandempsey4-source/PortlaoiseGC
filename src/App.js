@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import { initializeApp } from "firebase/app";
 import {
@@ -27,8 +28,7 @@ const firebaseConfig = {
   projectId: "portlaoise-golf-club-app",
   storageBucket: "portlaoise-golf-club-app.firebasestorage.app",
   messagingSenderId: "55958774219",
-  appId: "1:55958774219:web:9e4930603003bffc83564e",
-  measurementId: "G-10J79036R3"
+  appId: "1:55958774219:web:9e4930603003bffc83564e"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -38,90 +38,10 @@ const db = getFirestore(app);
 const CREST_URL =
   "https://irp.cdn-website.com/282f6f7b/dms3rep/multi/Portlaoise+G.C.png";
 
-const TEAM_OPTIONS = [
-  "Barton Shield",
-  "Irish Senior Cup",
-  "Irish Junior Cup",
-  "Irish Intermediate Cup",
-  "Jimmy Bruen",
-  "Pierce Purcell",
-  "JB Carr",
-  "Central Towns Cup",
-  "Duggan Cup",
-  "Morrissey Cup",
-  "Senior Foursomes",
-  "Leinster Fourball",
-  "Leinster Clubs",
-  "Provincial Towns Cup",
-  "Barton Cup (Super Seniors)",
-  "Senior Cup (55+)",
-  "Super Seniors Interclub",
-  "Ladies Senior Cup",
-  "Ladies Intermediate Cup",
-  "Ladies Junior Cup",
-  "Ladies Minor Cup",
-  "Ladies Challenge Cup",
-  "Ladies Senior Foursomes",
-  "Mixed Foursomes",
-  "Flogas Mixed Foursomes",
-  "Irish Mixed",
-  "Mixed Interclub",
-  "Fred Daly Trophy",
-  "Boys Interclub",
-  "Girls Interclub",
-  "Minor Cup",
-  "Challenge Match",
-  "Friendly Match"
-];
-
-const STANDARD_RESULTS = [
-  "1 up",
-  "2&1",
-  "3&2",
-  "4&3",
-  "5&4",
-  "6&5",
-  "7&6",
-  "8&7",
-  "9&8",
-  "10&8"
-];
-
-function getFormatFromCompetition(teamName) {
-  const foursomesCompetitions = [
-    "Mixed Foursomes",
-    "Flogas Mixed Foursomes",
-    "Ladies Senior Foursomes",
-    "Senior Foursomes"
-  ];
-
-  const fourballCompetitions = [
-    "JB Carr",
-    "Jimmy Bruen",
-    "Pierce Purcell",
-    "Leinster Fourball"
-  ];
-
-  if (foursomesCompetitions.includes(teamName)) return "Foursomes";
-  if (fourballCompetitions.includes(teamName)) return "Fourball";
-  return "Singles";
-}
-
 const colors = {
   navy: "#0f2d52",
-  royal: "#2448d8",
   gold: "#d4a64a",
-  paleGold: "#fff8e7",
-  paleBlue: "#eff6ff",
-  borderBlue: "#bfdbfe",
-  slate: "#475569",
-  light: "#f8fafc",
-  greenBg: "#dcfce7",
-  greenText: "#166534",
-  redBg: "#fee2e2",
-  redText: "#991b1b",
-  amberBg: "#fef3c7",
-  amberText: "#92400e"
+  light: "#f8fafc"
 };
 
 const styles = {
@@ -129,176 +49,43 @@ const styles = {
     minHeight: "100vh",
     background: colors.light,
     padding: "12px",
-    fontFamily: "Arial, sans-serif",
-    color: "#0f172a"
-  },
-  shell: {
-    maxWidth: "1240px",
-    margin: "0 auto"
+    fontFamily: "Arial"
   },
   card: {
     background: "white",
-    border: "1px solid #e2e8f0",
-    borderRadius: "18px",
+    borderRadius: "14px",
     padding: "16px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: 700,
-    margin: 0
-  },
-  inputWrap: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
     marginBottom: "12px"
-  },
-  label: {
-    fontSize: "13px",
-    fontWeight: 700,
-    color: "#334155"
-  },
-  input: {
-    padding: "12px 14px",
-    border: "1px solid #cbd5e1",
-    borderRadius: "12px",
-    fontSize: "16px",
-    width: "100%",
-    boxSizing: "border-box"
-  },
-  select: {
-    padding: "12px 14px",
-    border: "1px solid #cbd5e1",
-    borderRadius: "12px",
-    fontSize: "16px",
-    background: "white",
-    width: "100%",
-    boxSizing: "border-box"
-  },
-  button: {
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "1px solid #cbd5e1",
-    background: "white",
-    cursor: "pointer",
-    fontWeight: 700,
-    fontSize: "15px"
-  },
-  primaryButton: {
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "none",
-    background: colors.navy,
-    color: "white",
-    cursor: "pointer",
-    fontWeight: 700,
-    fontSize: "15px"
-  },
-  softButton: {
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: `1px solid ${colors.borderBlue}`,
-    background: colors.paleBlue,
-    color: colors.royal,
-    cursor: "pointer",
-    fontWeight: 700,
-    fontSize: "15px"
-  },
-  dangerButton: {
-    padding: "12px 14px",
-    borderRadius: "12px",
-    border: "1px solid #ef4444",
-    background: "white",
-    color: "#ef4444",
-    cursor: "pointer",
-    fontWeight: 700,
-    fontSize: "15px"
-  },
-  chip: {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "10px 12px",
-    borderRadius: "999px",
-    border: "1px solid #cbd5e1",
-    background: "white",
-    fontSize: "14px",
-    fontWeight: 700,
-    cursor: "pointer"
-  },
-  activeChip: {
-    background: colors.navy,
-    color: "white",
-    border: `1px solid ${colors.gold}`,
-    boxShadow: "0 4px 12px rgba(212,166,74,0.25)"
-  },
-  badge: {
-    display: "inline-block",
-    padding: "7px 10px",
-    borderRadius: "999px",
-    fontSize: "12px",
-    fontWeight: 700
-  },
-  small: {
-    fontSize: "14px",
-    color: colors.slate
   }
 };
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-function defaultFixture(overrides = {}) {
+function defaultFixture() {
   return {
     teamName: "Barton Shield",
-    competition: "Interclub Match",
-    ourClub: "Portlaoise Golf Club",
     opposition: "Opposition",
     venue: "Home",
-    date: "",
-    captain: "",
-    status: "Live",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    ...overrides
+    createdAt: Date.now()
   };
 }
 
-function defaultMatches(format = "Singles") {
-  return [1, 2, 3, 4].map((num) => ({
-    id: `match-${num}`,
-    order: num,
-    ourPlayers: `Player ${num}`,
-    theirPlayers: `Opponent ${num}`,
-    format,
+function defaultMatches() {
+  return [1, 2, 3, 4].map((i) => ({
+    id: `match-${i}`,
+    ourPlayers: `Player ${i}`,
+    theirPlayers: `Opponent ${i}`,
     status: "Not Started",
-    currentHole: 1,
     leader: "All Square",
     margin: 0,
-    finishedResult: "Not decided",
-    finishText: "",
-    notes: ""
+    currentHole: 1
   }));
 }
-
-function resultPoints(match) {
-  if (match.status !== "Finished") return { us: 0, them: 0 };
-  if (match.finishedResult === "Our team won") return { us: 1, them: 0 };
-  if (match.finishedResult === "Their team won") return { us: 0, them: 1 };
-  if (match.finishedResult === "Halved") return { us: 0.5, them: 0.5 };
-  return { us: 0, them: 0 };
-}
-
 function liveStatus(match) {
   if (match.status === "Finished") {
-    if (match.finishedResult === "Halved") return "Match halved";
-    if (match.finishedResult === "Our team won") {
-      return `Won ${match.finishText || ""}`.trim();
-    }
-    if (match.finishedResult === "Their team won") {
-      return `Lost ${match.finishText || ""}`.trim();
-    }
-    return "Finished";
+    if (match.leader === "Our team") return "Won";
+    if (match.leader === "Their team") return "Lost";
+    return "Halved";
   }
 
   if (match.status === "Not Started") return "Not started";
@@ -313,30 +100,45 @@ function liveStatus(match) {
   )}`;
 }
 
+function resultPoints(match) {
+  if (match.status !== "Finished") return { us: 0, them: 0 };
+  if (match.leader === "Our team") return { us: 1, them: 0 };
+  if (match.leader === "Their team") return { us: 0, them: 1 };
+  return { us: 0.5, them: 0.5 };
+}
+
 function badgeStyle(match) {
-  let bg = "#e2e8f0";
+  let background = "#e2e8f0";
   let color = "#0f172a";
 
   if (match.status === "Finished") {
-    if (match.finishedResult === "Our team won") {
-      bg = colors.greenBg;
-      color = colors.greenText;
-    } else if (match.finishedResult === "Their team won") {
-      bg = colors.redBg;
-      color = colors.redText;
-    } else if (match.finishedResult === "Halved") {
-      bg = colors.amberBg;
-      color = colors.amberText;
+    if (match.leader === "Our team") {
+      background = "#dcfce7";
+      color = "#166534";
+    } else if (match.leader === "Their team") {
+      background = "#fee2e2";
+      color = "#991b1b";
+    } else {
+      background = "#fef3c7";
+      color = "#92400e";
     }
   } else if (match.leader === "Our team") {
-    bg = colors.greenBg;
-    color = colors.greenText;
+    background = "#dcfce7";
+    color = "#166534";
   } else if (match.leader === "Their team") {
-    bg = colors.redBg;
-    color = colors.redText;
+    background = "#fee2e2";
+    color = "#991b1b";
   }
 
-  return { ...styles.badge, background: bg, color };
+  return {
+    display: "inline-block",
+    padding: "7px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: 700,
+    background,
+    color
+  };
 }
 
 function StatCard({ label, value }) {
@@ -347,167 +149,14 @@ function StatCard({ label, value }) {
         border: `1px solid ${colors.gold}`,
         borderRadius: "14px",
         padding: "14px",
-        textAlign: "center",
-        boxShadow: "0 4px 10px rgba(212,166,74,0.08)"
+        textAlign: "center"
       }}
     >
-      <div style={styles.small}>{label}</div>
+      <div style={{ fontSize: "14px", color: "#475569" }}>{label}</div>
       <div style={{ fontSize: "30px", fontWeight: 700, color: colors.navy }}>
         {value}
       </div>
     </div>
-  );
-}
-
-function getFixtureSummary(matches = [], ourClub, opposition) {
-  const official = matches.reduce(
-    (acc, match) => {
-      const pts = resultPoints(match);
-      acc.us += pts.us;
-      acc.them += pts.them;
-      return acc;
-    },
-    { us: 0, them: 0 }
-  );
-
-  const live = matches.reduce(
-    (acc, match) => {
-      if (match.status === "Finished") {
-        const pts = resultPoints(match);
-        acc.us += pts.us;
-        acc.them += pts.them;
-      } else if (match.status === "In Progress") {
-        if (match.leader === "Our team") {
-          acc.us += 1;
-        } else if (match.leader === "Their team") {
-          acc.them += 1;
-        } else {
-          acc.us += 0.5;
-          acc.them += 0.5;
-        }
-      }
-      return acc;
-    },
-    { us: 0, them: 0 }
-  );
-
-  let text = "Overall level";
-  if (live.us > live.them) text = `${ourClub} lead overall`;
-  if (live.them > live.us) text = `${opposition} lead overall`;
-
-  const liveCount = matches.filter((m) => m.status === "In Progress").length;
-
-  return {
-    official,
-    live,
-    text,
-    liveCount
-  };
-}
-
-function HomeFixtureCard({ fixture, summary, isActive, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        ...styles.card,
-        padding: "14px",
-        border: isActive ? `2px solid ${colors.gold}` : "1px solid #e2e8f0",
-        background: isActive ? "#fffdf7" : "white",
-        textAlign: "left",
-        cursor: "pointer",
-        width: "100%",
-        boxShadow: isActive
-          ? "0 6px 18px rgba(212,166,74,0.18)"
-          : "0 1px 3px rgba(0,0,0,0.05)"
-      }}
-    >
-      <div
-        style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          letterSpacing: "1.2px",
-          textTransform: "uppercase",
-          color: colors.navy
-        }}
-      >
-        {fixture.teamName}
-      </div>
-
-      <div style={{ fontSize: "18px", fontWeight: 700, marginTop: "6px" }}>
-        {fixture.ourClub || "Portlaoise Golf Club"} vs {fixture.opposition}
-      </div>
-
-      <div style={{ ...styles.small, marginTop: "8px" }}>
-        {fixture.venue || "Home"} {fixture.date ? `• ${fixture.date}` : ""}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "8px",
-          marginTop: "12px"
-        }}
-      >
-        <div
-          style={{
-            background: colors.paleBlue,
-            border: `1px solid ${colors.borderBlue}`,
-            borderRadius: "12px",
-            padding: "10px",
-            textAlign: "center"
-          }}
-        >
-          <div style={{ fontSize: "12px", color: colors.slate }}>Official</div>
-          <div style={{ fontWeight: 700 }}>
-            {summary.official.us}-{summary.official.them}
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: colors.paleGold,
-            border: `1px solid ${colors.gold}`,
-            borderRadius: "12px",
-            padding: "10px",
-            textAlign: "center"
-          }}
-        >
-          <div style={{ fontSize: "12px", color: colors.slate }}>Live</div>
-          <div style={{ fontWeight: 700 }}>
-            {summary.live.us}-{summary.live.them}
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          marginTop: "12px",
-          fontWeight: 700,
-          color: colors.navy
-        }}
-      >
-        {summary.text}
-      </div>
-
-      <div style={{ ...styles.small, marginTop: "4px" }}>
-        {summary.liveCount} live match{summary.liveCount === 1 ? "" : "es"} •{" "}
-        {fixture.status || "Live"}
-      </div>
-
-      <div
-        style={{
-          marginTop: "10px",
-          fontSize: "12px",
-          fontWeight: 700,
-          color: colors.gold
-        }}
-      >
-        {isActive ? "Selected on Home" : "Tap to feature on Home"}
-      </div>
-    </button>
   );
 }
 
@@ -519,31 +168,23 @@ export default function App() {
   const [matches, setMatches] = useState(defaultMatches());
   const [selectedMatchId, setSelectedMatchId] = useState("match-1");
   const [user, setUser] = useState(null);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const [newFixtureTeam, setNewFixtureTeam] = useState("Barton Shield");
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
-
-  const [fixtureSummaries, setFixtureSummaries] = useState({});
-  const [tvHighlightIndex, setTvHighlightIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200
   );
+
+  const isMobile = windowWidth < 900;
 
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  const isMobile = windowWidth < 900;
-  const isSmallMobile = windowWidth < 560;
 
   useEffect(() => {
     return onAuthStateChanged(auth, (nextUser) => setUser(nextUser || null));
@@ -564,15 +205,13 @@ export default function App() {
         }));
 
         if (nextFixtures.length === 0) {
-          const baseTeam = "Barton Shield";
-          const baseFormat = getFormatFromCompetition(baseTeam);
           const fixtureRef = await addDoc(
             collection(db, "fixtures"),
-            defaultFixture({ teamName: baseTeam })
+            defaultFixture()
           );
 
           const batch = writeBatch(db);
-          defaultMatches(baseFormat).forEach((match) => {
+          defaultMatches().forEach((match) => {
             batch.set(
               doc(db, "fixtures", fixtureRef.id, "matches", match.id),
               match
@@ -594,29 +233,6 @@ export default function App() {
 
     return () => unsub();
   }, []);
-
-  useEffect(() => {
-    if (!fixtures.length) return;
-
-    const unsubs = fixtures.map((fx) => {
-      const matchesQuery = query(
-        collection(db, "fixtures", fx.id, "matches"),
-        orderBy("order", "asc")
-      );
-
-      return onSnapshot(matchesQuery, (snap) => {
-        const list = snap.docs.map((d) => d.data());
-        setFixtureSummaries((prev) => ({
-          ...prev,
-          [fx.id]: getFixtureSummary(list, fx.ourClub, fx.opposition)
-        }));
-      });
-    });
-
-    return () => {
-      unsubs.forEach((fn) => fn && fn());
-    };
-  }, [fixtures]);
 
   useEffect(() => {
     if (!activeFixtureId) return;
@@ -641,8 +257,11 @@ export default function App() {
       async (snap) => {
         if (snap.empty) {
           const batch = writeBatch(db);
-          defaultMatches(getFormatFromCompetition(fixture.teamName)).forEach((match) => {
-            batch.set(doc(db, "fixtures", activeFixtureId, "matches", match.id), match);
+          defaultMatches().forEach((match) => {
+            batch.set(
+              doc(db, "fixtures", activeFixtureId, "matches", match.id),
+              match
+            );
           });
           await batch.commit();
           return;
@@ -652,12 +271,8 @@ export default function App() {
           id: docSnap.id,
           ...docSnap.data()
         }));
-
         setMatches(nextMatches);
-        setSelectedMatchId((current) => {
-          if (nextMatches.find((m) => m.id === current)) return current;
-          return nextMatches[0]?.id || "";
-        });
+        setSelectedMatchId((current) => current || nextMatches[0]?.id || "");
       },
       (err) => setError(err.message || "Could not load matches.")
     );
@@ -666,27 +281,10 @@ export default function App() {
       unsubFixture();
       unsubMatches();
     };
-  }, [activeFixtureId, fixture.teamName]);
+  }, [activeFixtureId]);
 
-  useEffect(() => {
-    if (screen !== "tv" || matches.length === 0) return;
-    const interval = setInterval(() => {
-      setTvHighlightIndex((prev) => (prev + 1) % matches.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [screen, matches.length]);
-
-  const activeFixtureIndex = useMemo(
-    () => fixtures.findIndex((f) => f.id === activeFixtureId),
-    [fixtures, activeFixtureId]
-  );
-
-  const previousFixture =
-    activeFixtureIndex > 0 ? fixtures[activeFixtureIndex - 1] : null;
-  const nextFixture =
-    activeFixtureIndex >= 0 && activeFixtureIndex < fixtures.length - 1
-      ? fixtures[activeFixtureIndex + 1]
-      : null;
+  const selectedMatch =
+    matches.find((m) => m.id === selectedMatchId) || matches[0] || null;
 
   const totals = useMemo(() => {
     return matches.reduce(
@@ -694,75 +292,15 @@ export default function App() {
         const pts = resultPoints(match);
         acc.us += pts.us;
         acc.them += pts.them;
-        if (match.status === "Finished") acc.finished += 1;
         if (match.status === "In Progress") acc.live += 1;
         return acc;
       },
-      { us: 0, them: 0, finished: 0, live: 0 }
+      { us: 0, them: 0, live: 0 }
     );
   }, [matches]);
-
-  const liveTotals = useMemo(() => {
-    return matches.reduce(
-      (acc, match) => {
-        if (match.status === "Finished") {
-          const pts = resultPoints(match);
-          acc.us += pts.us;
-          acc.them += pts.them;
-        } else if (match.status === "In Progress") {
-          if (match.leader === "Our team") {
-            acc.us += 1;
-          } else if (match.leader === "Their team") {
-            acc.them += 1;
-          } else {
-            acc.us += 0.5;
-            acc.them += 0.5;
-          }
-        }
-        return acc;
-      },
-      { us: 0, them: 0 }
-    );
-  }, [matches]);
-
-  const liveMatchSummary = useMemo(() => {
-    const ourLeading = matches.filter(
-      (m) => m.status === "In Progress" && m.leader === "Our team"
-    ).length;
-    const theirLeading = matches.filter(
-      (m) => m.status === "In Progress" && m.leader === "Their team"
-    ).length;
-    const allSquare = matches.filter(
-      (m) => m.status === "In Progress" && m.leader === "All Square"
-    ).length;
-    return { ourLeading, theirLeading, allSquare };
-  }, [matches]);
-
-  const liveOverallText = useMemo(() => {
-    if (liveTotals.us > liveTotals.them) {
-      return `${fixture.ourClub} currently leads overall`;
-    }
-    if (liveTotals.them > liveTotals.us) {
-      return `${fixture.opposition} currently leads overall`;
-    }
-    return "Overall match is currently level";
-  }, [liveTotals, fixture.ourClub, fixture.opposition]);
-
-  const selectedMatch =
-    matches.find((m) => m.id === selectedMatchId) || matches[0] || null;
-
-  const isCaptain = !!user;
-
-  const tickerItems = useMemo(() => {
-    return fixtures.map((fx) => {
-      const summary = fixtureSummaries[fx.id];
-      if (!summary) return `${fx.teamName}: live`;
-      return `${fx.teamName}: ${summary.official.us}-${summary.official.them} official | ${summary.live.us}-${summary.live.them} live`;
-    });
-  }, [fixtures, fixtureSummaries]);
 
   async function saveFixtureField(key, value) {
-    if (!isCaptain || !activeFixtureId) return;
+    if (!user || !activeFixtureId) return;
     await setDoc(
       doc(db, "fixtures", activeFixtureId),
       { [key]: value, updatedAt: Date.now() },
@@ -771,15 +309,10 @@ export default function App() {
   }
 
   async function saveMatchField(matchId, key, value) {
-    if (!isCaptain || !activeFixtureId) return;
-
+    if (!user || !activeFixtureId) return;
     const patch = { [key]: value };
 
     if (key === "leader" && value === "All Square") patch.margin = 0;
-    if (key === "status" && value !== "Finished") {
-      patch.finishedResult = "Not decided";
-      patch.finishText = "";
-    }
 
     await updateDoc(
       doc(db, "fixtures", activeFixtureId, "matches", matchId),
@@ -794,90 +327,52 @@ export default function App() {
   }
 
   async function addMatch() {
-    if (!isCaptain || !activeFixtureId) return;
-
+    if (!user || !activeFixtureId) return;
     const nextOrder = matches.length + 1;
     const nextId = `match-${uid()}`;
-    const autoFormat = getFormatFromCompetition(fixture.teamName);
 
     await setDoc(doc(db, "fixtures", activeFixtureId, "matches", nextId), {
       id: nextId,
       order: nextOrder,
       ourPlayers: `Player ${nextOrder}`,
       theirPlayers: `Opponent ${nextOrder}`,
-      format: autoFormat,
       status: "Not Started",
-      currentHole: 1,
       leader: "All Square",
       margin: 0,
-      finishedResult: "Not decided",
-      finishText: "",
-      notes: ""
+      currentHole: 1
     });
 
     setSelectedMatchId(nextId);
   }
 
   async function deleteMatch(matchId) {
-    if (!isCaptain || !activeFixtureId || !matchId) return;
+    if (!user || !activeFixtureId) return;
+    if (!window.confirm("Delete this match?")) return;
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this match?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      await deleteDoc(doc(db, "fixtures", activeFixtureId, "matches", matchId));
-
-      const remainingMatches = matches.filter((m) => m.id !== matchId);
-      setMatches(remainingMatches);
-      setSelectedMatchId(remainingMatches[0]?.id || "");
-
-      await setDoc(
-        doc(db, "fixtures", activeFixtureId),
-        { updatedAt: Date.now() },
-        { merge: true }
-      );
-    } catch (err) {
-      alert("Could not delete match.");
-      console.error("Delete match failed:", err);
-    }
+    await deleteDoc(doc(db, "fixtures", activeFixtureId, "matches", matchId));
   }
 
   async function deleteFixture() {
-    if (!isCaptain || !activeFixtureId) return;
+    if (!user || !activeFixtureId) return;
+    if (!window.confirm("Delete this fixture and all matches?")) return;
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this entire fixture and all of its matches?"
-    );
-    if (!confirmDelete) return;
+    const matchesRef = collection(db, "fixtures", activeFixtureId, "matches");
+    const snap = await getDocs(matchesRef);
+    const batch = writeBatch(db);
 
-    try {
-      const matchesRef = collection(db, "fixtures", activeFixtureId, "matches");
-      const snap = await getDocs(matchesRef);
-      const batch = writeBatch(db);
+    snap.forEach((docSnap) => {
+      batch.delete(doc(db, "fixtures", activeFixtureId, "matches", docSnap.id));
+    });
 
-      snap.forEach((docSnap) => {
-        batch.delete(doc(db, "fixtures", activeFixtureId, "matches", docSnap.id));
-      });
+    batch.delete(doc(db, "fixtures", activeFixtureId));
+    await batch.commit();
 
-      batch.delete(doc(db, "fixtures", activeFixtureId));
-      await batch.commit();
-
-      const remainingFixtures = fixtures.filter((f) => f.id !== activeFixtureId);
-      setActiveFixtureId(remainingFixtures[0]?.id || "");
-      setSelectedMatchId("");
-      setScreen("home");
-    } catch (err) {
-      alert("Could not delete fixture.");
-      console.error("Delete fixture failed:", err);
-    }
+    setScreen("home");
   }
 
   async function createFixture() {
-    if (!isCaptain) return;
+    if (!user) return;
 
-    const autoFormat = getFormatFromCompetition(newFixtureTeam);
     const fixtureRef = await addDoc(
       collection(db, "fixtures"),
       defaultFixture({
@@ -887,7 +382,7 @@ export default function App() {
     );
 
     const batch = writeBatch(db);
-    defaultMatches(autoFormat).forEach((match) => {
+    defaultMatches().forEach((match) => {
       batch.set(doc(db, "fixtures", fixtureRef.id, "matches", match.id), match);
     });
     await batch.commit();
@@ -901,16 +396,12 @@ export default function App() {
   async function signInCaptain(e) {
     e.preventDefault();
     setError("");
-    setAuthLoading(true);
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setPassword("");
       setScreen("captain");
     } catch (err) {
       setError(err.message || "Login failed.");
-    } finally {
-      setAuthLoading(false);
     }
   }
 
@@ -919,49 +410,11 @@ export default function App() {
     setScreen("home");
   }
 
-  async function setLeaderQuick(leader) {
-    if (!selectedMatch || !isCaptain) return;
-
-    await saveMatchField(selectedMatch.id, "status", "In Progress");
-    await saveMatchField(selectedMatch.id, "leader", leader);
-
-    if (
-      leader !== "All Square" &&
-      (!selectedMatch.margin || selectedMatch.margin === 0)
-    ) {
-      await saveMatchField(selectedMatch.id, "margin", 1);
-    }
-  }
-
-  async function adjustHole(amount) {
-    if (!selectedMatch || !isCaptain) return;
-    const next = Math.min(
-      19,
-      Math.max(1, (selectedMatch.currentHole || 1) + amount)
-    );
-    await saveMatchField(selectedMatch.id, "currentHole", next);
-  }
-
-  async function adjustMargin(amount) {
-    if (!selectedMatch || !isCaptain || selectedMatch.leader === "All Square") {
-      return;
-    }
-    const next = Math.min(
-      10,
-      Math.max(1, (selectedMatch.margin || 1) + amount)
-    );
-    await saveMatchField(selectedMatch.id, "margin", next);
-  }
-
   async function copySummary() {
     const text = [
-      `${fixture.teamName} - ${fixture.competition}`,
+      `${fixture.teamName}`,
       `${fixture.ourClub} vs ${fixture.opposition}`,
       `Venue: ${fixture.venue}`,
-      `Date: ${fixture.date || "TBC"}`,
-      `Captain: ${fixture.captain || "TBC"}`,
-      `Official: ${totals.us}-${totals.them}`,
-      `Live Overall: ${liveTotals.us}-${liveTotals.them}`,
       "",
       ...matches.map(
         (m, i) =>
@@ -969,8 +422,7 @@ export default function App() {
             m.theirPlayers || "TBC"
           } | ${liveStatus(m)}`
       )
-    ].join("
-");
+    ].join("\\n");
 
     try {
       await navigator.clipboard.writeText(text);
@@ -983,7 +435,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={styles.page}>
-        <div style={styles.shell}>
+        <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
           <div style={styles.card}>Loading Portlaoise Interclub App...</div>
         </div>
       </div>
@@ -1009,84 +461,11 @@ export default function App() {
               width: isMobile ? "88px" : "110px",
               height: isMobile ? "88px" : "110px",
               objectFit: "contain",
-              marginBottom: "12px",
-              filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.25))"
+              marginBottom: "12px"
             }}
           />
-
-          <div
-            style={{
-              fontSize: isMobile ? "14px" : "18px",
-              opacity: 0.9,
-              color: "#f8e7b9",
-              letterSpacing: "1.2px",
-              textTransform: "uppercase",
-              fontWeight: 700
-            }}
-          >
-            {fixture.teamName}
-          </div>
-
-          <div
-            style={{
-              fontSize: isMobile ? "28px" : "54px",
-              fontWeight: 800,
-              marginTop: "8px",
-              lineHeight: 1.15
-            }}
-          >
-            {fixture.ourClub} {liveTotals.us} - {liveTotals.them} {fixture.opposition}
-          </div>
-
-          <div
-            style={{
-              fontSize: isMobile ? "18px" : "24px",
-              marginTop: "10px",
-              color: "#f8e7b9"
-            }}
-          >
-            {liveOverallText}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-            gap: "16px",
-            marginBottom: "24px"
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: "18px",
-              padding: "20px",
-              border: `1px solid ${colors.gold}`
-            }}
-          >
-            <div style={{ fontSize: "18px", opacity: 0.8, color: "#f8e7b9" }}>
-              Official Score
-            </div>
-            <div style={{ fontSize: isMobile ? "34px" : "46px", fontWeight: 800 }}>
-              {totals.us}-{totals.them}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: "18px",
-              padding: "20px",
-              border: `1px solid ${colors.gold}`
-            }}
-          >
-            <div style={{ fontSize: "18px", opacity: 0.8, color: "#f8e7b9" }}>
-              Live Matches
-            </div>
-            <div style={{ fontSize: isMobile ? "34px" : "46px", fontWeight: 800 }}>
-              {totals.live}
-            </div>
+          <div style={{ fontSize: isMobile ? "28px" : "54px", fontWeight: 800 }}>
+            {fixture.ourClub} {totals.us} - {totals.them} {fixture.opposition}
           </div>
         </div>
 
@@ -1095,18 +474,10 @@ export default function App() {
             <div
               key={m.id}
               style={{
-                background:
-                  i === tvHighlightIndex
-                    ? `linear-gradient(135deg, ${colors.gold} 0%, #e7c46a 100%)`
-                    : "rgba(255,255,255,0.08)",
-                color: i === tvHighlightIndex ? colors.navy : "white",
+                background: i === 0 ? `linear-gradient(135deg, ${colors.gold} 0%, #e7c46a 100%)` : "rgba(255,255,255,0.08)",
+                color: i === 0 ? colors.navy : "white",
                 borderRadius: "18px",
-                padding: isMobile ? "16px" : "18px 22px",
-                transition: "all 0.3s ease",
-                border:
-                  i === tvHighlightIndex
-                    ? `2px solid ${colors.gold}`
-                    : "1px solid rgba(255,255,255,0.12)"
+                padding: isMobile ? "16px" : "18px 22px"
               }}
             >
               <div
@@ -1146,9 +517,7 @@ export default function App() {
               background: "white",
               color: colors.navy,
               fontWeight: 700,
-              cursor: "pointer",
-              width: isMobile ? "100%" : "auto",
-              maxWidth: isMobile ? "320px" : "none"
+              cursor: "pointer"
             }}
           >
             Exit TV Mode
@@ -1171,39 +540,20 @@ export default function App() {
         <div
           style={{
             ...styles.card,
-            background: `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`,
+            background: `linear-gradient(135deg, ${colors.navy} 0%, #2448d8 100%)`,
             color: "white",
             position: "relative",
             overflow: "hidden",
             marginBottom: "16px",
-            border: `1px solid ${colors.gold}`,
-            padding: isMobile ? "14px" : "16px"
+            border: `1px solid ${colors.gold}`
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              right: "-20px",
-              top: "-10px",
-              opacity: 0.08,
-              transform: "scale(1.8)"
-            }}
-          >
-            <img
-              src={CREST_URL}
-              alt="Portlaoise Golf Club crest watermark"
-              style={{ width: 180 }}
-            />
-          </div>
-
           <div
             style={{
               display: "flex",
               alignItems: isMobile ? "flex-start" : "center",
               flexDirection: isMobile ? "column" : "row",
-              gap: "14px",
-              position: "relative",
-              zIndex: 1
+              gap: "14px"
             }}
           >
             <div
@@ -1211,23 +561,17 @@ export default function App() {
                 width: isMobile ? "64px" : "74px",
                 height: isMobile ? "64px" : "74px",
                 background: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.18)",
                 borderRadius: "18px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "8px",
-                flexShrink: 0
+                padding: "8px"
               }}
             >
               <img
                 src={CREST_URL}
                 alt="Portlaoise Golf Club crest"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain"
-                }}
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
               />
             </div>
             <div>
@@ -1242,29 +586,11 @@ export default function App() {
               >
                 Portlaoise Golf Club
               </div>
-              <h1
-                style={{
-                  ...styles.title,
-                  color: "white",
-                  marginTop: "6px",
-                  fontSize: isMobile ? "22px" : "28px"
-                }}
-              >
+              <h1 style={{ ...styles.title, color: "white", marginTop: "6px" }}>
                 Live Interclub Web App
               </h1>
-              <p
-                style={{
-                  color: "rgba(255,255,255,0.95)",
-                  marginTop: "8px",
-                  marginBottom: 0,
-                  maxWidth: "900px",
-                  lineHeight: 1.45,
-                  fontSize: isMobile ? "15px" : "16px"
-                }}
-              >
-                Best of luck to all Portlaoise teams, players and managers.
-                Thank you to all our supporters. Captains Betty and Tiernan,
-                and President Eddie.
+              <p style={{ color: "rgba(255,255,255,0.95)", marginTop: "8px", marginBottom: 0 }}>
+                Best of luck to all Portlaoise teams, players and managers. Thank you to all our supporters. Captains Betty and Tiernan, and President Eddie.
               </p>
             </div>
           </div>
@@ -1276,17 +602,11 @@ export default function App() {
             padding: "0",
             overflow: "hidden",
             borderColor: colors.gold,
-            background: colors.paleGold,
+            background: "#fff8e7",
             marginBottom: "16px"
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              minHeight: "48px"
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", minHeight: "48px" }}>
             <div
               style={{
                 background: colors.navy,
@@ -1298,12 +618,7 @@ export default function App() {
             >
               LIVE
             </div>
-            <div
-              style={{
-                overflow: "hidden",
-                width: "100%"
-              }}
-            >
+            <div style={{ overflow: "hidden", width: "100%" }}>
               <div
                 style={{
                   display: "flex",
@@ -1311,19 +626,18 @@ export default function App() {
                   animation: "tickerScroll 28s linear infinite"
                 }}
               >
-                {[...tickerItems, ...tickerItems].map((item, index) => (
+                {[...fixtures, ...fixtures].map((item, index) => (
                   <div
-                    key={`${item}-${index}`}
+                    key={`${item.id}-${index}`}
                     style={{
                       padding: "0 24px",
                       lineHeight: "48px",
                       whiteSpace: "nowrap",
                       fontWeight: 700,
-                      color: colors.navy,
-                      fontSize: isMobile ? "14px" : "16px"
+                      color: colors.navy
                     }}
                   >
-                    {item}
+                    {item.teamName} vs {item.opposition}
                   </div>
                 ))}
               </div>
@@ -1334,102 +648,41 @@ export default function App() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isSmallMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(120px, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(120px, 1fr))",
             gap: "10px",
             marginBottom: "16px"
           }}
         >
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "home" ? styles.activeChip : {}),
-              width: "100%"
-            }}
-            onClick={() => setScreen("home")}
-          >
+          <button style={{ ...styles.button, ...(screen === "home" ? styles.activeChip : {}) }} onClick={() => setScreen("home")}>
             Home
           </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "spectator" ? styles.activeChip : {}),
-              width: "100%"
-            }}
-            onClick={() => setScreen("spectator")}
-          >
+          <button style={{ ...styles.button, ...(screen === "spectator" ? styles.activeChip : {}) }} onClick={() => setScreen("spectator")}>
             Spectator
           </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "captain" ? styles.activeChip : {}),
-              width: "100%"
-            }}
-            onClick={() => setScreen("captain")}
-          >
+          <button style={{ ...styles.button, ...(screen === "captain" ? styles.activeChip : {}) }} onClick={() => setScreen("captain")}>
             Captain
           </button>
-          <button
-            style={{
-              ...styles.chip,
-              ...(screen === "tv" ? styles.activeChip : {}),
-              width: "100%"
-            }}
-            onClick={() => setScreen("tv")}
-          >
+          <button style={{ ...styles.button, ...(screen === "tv" ? styles.activeChip : {}) }} onClick={() => setScreen("tv")}>
             TV Mode
           </button>
-          <button style={{ ...styles.button, width: "100%" }} onClick={copySummary}>
+          <button style={styles.button} onClick={copySummary}>
             Copy Summary
           </button>
           {isCaptain ? (
-            <button style={{ ...styles.button, width: "100%" }} onClick={logOutCaptain}>
+            <button style={styles.button} onClick={logOutCaptain}>
               Log Out
             </button>
           ) : null}
         </div>
 
         {error ? (
-          <div
-            style={{
-              ...styles.card,
-              marginBottom: "16px",
-              borderColor: "#fecaca",
-              color: "#991b1b"
-            }}
-          >
+          <div style={{ ...styles.card, marginBottom: "16px", borderColor: "#fecaca", color: "#991b1b" }}>
             {error}
           </div>
         ) : null}
 
         {screen === "home" ? (
           <div>
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <div>
-                  <h2 style={{ margin: 0, color: colors.navy, fontSize: isMobile ? "28px" : "32px" }}>
-                    Club Match Centre
-                  </h2>
-                  <div style={styles.small}>
-                    Live fixtures and scores across all Portlaoise teams.
-                  </div>
-                </div>
-                <img
-                  src={CREST_URL}
-                  alt="Club crest"
-                  style={{ width: 56, height: 56, objectFit: "contain" }}
-                />
-              </div>
-            </div>
-
             <div
               style={{
                 display: "grid",
@@ -1442,10 +695,7 @@ export default function App() {
                 <HomeFixtureCard
                   key={item.id}
                   fixture={item}
-                  summary={
-                    fixtureSummaries[item.id] ||
-                    getFixtureSummary([], item.ourClub, item.opposition)
-                  }
+                  summary={fixtureSummaries[item.id] || getFixtureSummary([], item.ourClub, item.opposition)}
                   isActive={item.id === activeFixtureId}
                   onClick={() => {
                     setActiveFixtureId(item.id);
@@ -1455,140 +705,23 @@ export default function App() {
               ))}
             </div>
 
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                border: `1px solid ${colors.gold}`,
-                background: "linear-gradient(180deg, #fffdf7 0%, white 100%)"
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                  marginBottom: "14px"
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "1.4px",
-                      textTransform: "uppercase",
-                      color: colors.gold
-                    }}
-                  >
-                    Featured Fixture
-                  </div>
-                  <h2 style={{ margin: "6px 0 4px 0", color: colors.navy }}>
-                    {fixture.teamName}
-                  </h2>
-                  <div style={styles.small}>
-                    {fixture.ourClub} vs {fixture.opposition}
-                  </div>
-                  <div style={styles.small}>
-                    {fixture.venue} {fixture.date ? `• ${fixture.date}` : ""}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr",
-                    gap: "10px",
-                    width: isMobile ? "100%" : "auto"
-                  }}
-                >
-                  <button
-                    type="button"
-                    style={{ ...styles.button, width: "100%" }}
-                    onClick={() => setScreen("spectator")}
-                  >
-                    Open Spectator View
-                  </button>
-                  <button
-                    type="button"
-                    style={{ ...styles.button, width: "100%" }}
-                    onClick={() => setScreen("tv")}
-                  >
-                    Open TV Mode
-                  </button>
-                </div>
+            <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
+              <h2 style={{ color: colors.navy, marginTop: 0 }}>{fixture.teamName}</h2>
+              <div style={{ marginBottom: "14px", color: "#475569" }}>
+                {fixture.ourClub} vs {fixture.opposition}
               </div>
 
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(180px, 1fr))",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
                   gap: "12px",
                   marginBottom: "16px"
                 }}
               >
-                <div
-                  style={{
-                    background: colors.paleBlue,
-                    border: `1px solid ${colors.borderBlue}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Official Score</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {totals.us}-{totals.them}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: colors.paleGold,
-                    border: `1px solid ${colors.gold}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Live Overall</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {liveTotals.us}-{liveTotals.them}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: "#ffffff",
-                    border: `1px solid ${colors.gold}`,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div style={styles.small}>Live Matches</div>
-                  <div style={{ fontSize: "30px", fontWeight: 800, color: colors.navy }}>
-                    {totals.live}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: "14px",
-                  borderRadius: "14px",
-                  background: colors.paleGold,
-                  border: `1px solid ${colors.gold}`,
-                  marginBottom: "14px"
-                }}
-              >
-                <div style={{ fontWeight: 700, color: colors.navy }}>{liveOverallText}</div>
-                <div style={{ ...styles.small, marginTop: "4px" }}>
-                  Portlaoise leading: {liveMatchSummary.ourLeading} • Opposition leading:{" "}
-                  {liveMatchSummary.theirLeading} • All square: {liveMatchSummary.allSquare}
-                </div>
+                <StatCard label="Official Score" value={`${totals.us}-${totals.them}`} />
+                <StatCard label="Live Matches" value={totals.live} />
+                <StatCard label="Fixture Matches" value={matches.length} />
               </div>
 
               <div style={{ display: "grid", gap: "10px" }}>
@@ -1610,75 +743,28 @@ export default function App() {
                       <div style={{ fontWeight: 700, color: colors.navy }}>
                         Match {index + 1}
                       </div>
-                      <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
-                      <div style={styles.small}>vs {match.theirPlayers || "TBC"}</div>
+                      <div style={{ fontSize: "14px", color: "#475569" }}>
+                        {match.ourPlayers || "TBC"}
+                      </div>
+                      <div style={{ fontSize: "14px", color: "#475569" }}>
+                        vs {match.theirPlayers || "TBC"}
+                      </div>
                     </div>
-
                     <span style={badgeStyle(match)}>{liveStatus(match)}</span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                gap: "12px"
-              }}
-            >
-              <StatCard label="Total Fixtures" value={fixtures.length} />
-              <StatCard label="Current Fixture Matches" value={matches.length} />
-            </div>
           </div>
         ) : screen === "spectator" ? (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "1.5px",
-                      color: colors.navy
-                    }}
-                  >
-                    {fixture.teamName} • {fixture.competition}
-                  </div>
-                  <h2 style={{ margin: "6px 0 8px 0", color: colors.navy }}>
-                    {fixture.ourClub} vs {fixture.opposition}
-                  </h2>
-                  <div style={styles.small}>
-                    {fixture.venue} {fixture.date ? `• ${fixture.date}` : ""}
-                  </div>
-                  <div style={styles.small}>
-                    Captain: {fixture.captain || "TBC"}
-                  </div>
-                </div>
+              <h2 style={{ color: colors.navy, marginTop: 0 }}>
+                {fixture.ourClub} vs {fixture.opposition}
+              </h2>
 
-                <button
-                  type="button"
-                  style={{ ...styles.button, width: isMobile ? "100%" : "auto" }}
-                  onClick={() => setScreen("home")}
-                >
-                  Back Home
-                </button>
-              </div>
-
-              <div style={{ marginTop: "14px" }}>
-                <label
-                  style={{ ...styles.label, marginBottom: "6px", display: "block" }}
-                >
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ ...styles.label, display: "block", marginBottom: "6px" }}>
                   Switch Fixture
                 </label>
                 <select
@@ -1700,149 +786,15 @@ export default function App() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr",
-                  gap: "8px",
-                  marginTop: "12px"
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: "12px",
+                  marginBottom: "16px"
                 }}
               >
-                <button
-                  type="button"
-                  style={{ ...styles.button, width: "100%" }}
-                  disabled={!previousFixture}
-                  onClick={() => {
-                    if (!previousFixture) return;
-                    setActiveFixtureId(previousFixture.id);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  ← Previous Fixture
-                </button>
-                <button
-                  type="button"
-                  style={{ ...styles.button, width: "100%" }}
-                  disabled={!nextFixture}
-                  onClick={() => {
-                    if (!nextFixture) return;
-                    setActiveFixtureId(nextFixture.id);
-                    setSelectedMatchId("");
-                  }}
-                >
-                  Next Fixture →
-                </button>
+                <StatCard label="Official Score" value={`${totals.us}-${totals.them}`} />
+                <StatCard label="Live Overall" value={`${totals.us}-${totals.them}`} />
               </div>
-            </div>
 
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                overflowX: "auto",
-                whiteSpace: "nowrap",
-                borderColor: colors.gold,
-                background: "#fffdf7"
-              }}
-            >
-              <div style={{ display: "flex", gap: "10px", minWidth: "max-content" }}>
-                {fixtures.map((item) => {
-                  const isActive = item.id === activeFixtureId;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveFixtureId(item.id);
-                        setSelectedMatchId("");
-                      }}
-                      style={{
-                        ...styles.button,
-                        minWidth: "240px",
-                        textAlign: "left",
-                        borderRadius: "16px",
-                        background: isActive
-                          ? `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`
-                          : "white",
-                        color: isActive ? "white" : "#0f172a",
-                        border: isActive
-                          ? `1px solid ${colors.gold}`
-                          : "1px solid #cbd5e1",
-                        boxShadow: isActive
-                          ? "0 6px 18px rgba(212,166,74,0.18)"
-                          : "none"
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          letterSpacing: "1.2px",
-                          textTransform: "uppercase",
-                          opacity: isActive ? 0.95 : 0.7
-                        }}
-                      >
-                        {item.teamName}
-                      </div>
-                      <div style={{ fontWeight: 700, marginTop: "6px" }}>
-                        vs {item.opposition}
-                      </div>
-                      <div
-                        style={{
-                          marginTop: "6px",
-                          fontSize: "13px",
-                          opacity: isActive ? 0.95 : 0.7
-                        }}
-                      >
-                        {item.venue || "Home"} {item.date ? `• ${item.date}` : ""}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                gap: "12px",
-                marginBottom: "12px"
-              }}
-            >
-              <StatCard
-                label="Official Score"
-                value={`${totals.us}-${totals.them}`}
-              />
-              <StatCard
-                label="Live Overall"
-                value={`${liveTotals.us}-${liveTotals.them}`}
-              />
-            </div>
-
-            <div
-              style={{
-                ...styles.card,
-                marginBottom: "16px",
-                background: colors.paleGold,
-                borderColor: colors.gold
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: colors.navy,
-                  marginBottom: "6px"
-                }}
-              >
-                {liveOverallText}
-              </div>
-              <div style={styles.small}>
-                Portlaoise leading: {liveMatchSummary.ourLeading} • Opposition
-                leading: {liveMatchSummary.theirLeading} • All square:{" "}
-                {liveMatchSummary.allSquare}
-              </div>
-            </div>
-
-            <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <h3 style={{ marginTop: 0, color: colors.navy }}>Matches</h3>
               {matches.map((match, index) => (
                 <div
                   key={match.id}
@@ -1856,22 +808,21 @@ export default function App() {
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: isSmallMobile ? "column" : "row",
+                      flexDirection: isMobile ? "column" : "row",
                       justifyContent: "space-between",
                       gap: "10px",
-                      alignItems: isSmallMobile ? "flex-start" : "center"
+                      alignItems: isMobile ? "flex-start" : "center"
                     }}
                   >
                     <div>
                       <div style={{ fontWeight: 700, marginBottom: "4px" }}>
                         Match {index + 1}
                       </div>
-                      <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
-                      <div style={styles.small}>
-                        vs {match.theirPlayers || "TBC"}
+                      <div style={{ fontSize: "14px", color: "#475569" }}>
+                        {match.ourPlayers || "TBC"}
                       </div>
-                      <div style={{ ...styles.small, marginTop: "4px" }}>
-                        {match.format}
+                      <div style={{ fontSize: "14px", color: "#475569" }}>
+                        vs {match.theirPlayers || "TBC"}
                       </div>
                     </div>
                     <span style={badgeStyle(match)}>{liveStatus(match)}</span>
@@ -1886,11 +837,7 @@ export default function App() {
             <form onSubmit={signInCaptain}>
               <div style={styles.inputWrap}>
                 <label style={styles.label}>Email</label>
-                <input
-                  style={styles.input}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <input style={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div style={styles.inputWrap}>
                 <label style={styles.label}>Password</label>
@@ -1901,7 +848,7 @@ export default function App() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <button style={{ ...styles.primaryButton, width: isMobile ? "100%" : "auto" }} disabled={authLoading}>
+              <button style={styles.primaryButton}>
                 {authLoading ? "Signing In..." : "Sign In"}
               </button>
             </form>
@@ -1909,9 +856,7 @@ export default function App() {
         ) : (
           <div>
             <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-              <h3 style={{ marginTop: 0, color: colors.navy }}>
-                Create New Fixture
-              </h3>
+              <h3 style={{ marginTop: 0, color: colors.navy }}>Create New Fixture</h3>
               <div
                 style={{
                   display: "grid",
@@ -1944,12 +889,8 @@ export default function App() {
                   />
                 </div>
 
-                <div style={{ display: "flex", alignItems: isMobile ? "stretch" : "end" }}>
-                  <button
-                    type="button"
-                    style={{ ...styles.primaryButton, width: "100%" }}
-                    onClick={createFixture}
-                  >
+                <div style={{ display: "flex", alignItems: "end" }}>
+                  <button type="button" style={{ ...styles.primaryButton, width: "100%" }} onClick={createFixture}>
                     Create Fixture
                   </button>
                 </div>
@@ -1970,15 +911,11 @@ export default function App() {
                     <div
                       key={item.id}
                       style={{
-                        border:
-                          activeFixtureId === item.id
-                            ? `2px solid ${colors.gold}`
-                            : "1px solid #e2e8f0",
+                        border: activeFixtureId === item.id ? `2px solid ${colors.gold}` : "1px solid #e2e8f0",
                         borderRadius: "14px",
                         padding: "12px",
                         marginBottom: "10px",
-                        background:
-                          activeFixtureId === item.id ? "#fffdf7" : "white"
+                        background: activeFixtureId === item.id ? "#fffdf7" : "white"
                       }}
                     >
                       <button
@@ -1997,30 +934,20 @@ export default function App() {
                         }}
                       >
                         <div style={{ fontWeight: 700 }}>{item.teamName}</div>
-                        <div style={styles.small}>vs {item.opposition}</div>
-                        <div style={styles.small}>{item.date || "No date set"}</div>
+                        <div style={{ fontSize: "14px", color: "#475569" }}>vs {item.opposition}</div>
+                        <div style={{ fontSize: "14px", color: "#475569" }}>{item.date || "No date set"}</div>
                       </button>
                     </div>
                   ))}
 
-                  <button
-                    type="button"
-                    style={{ ...styles.dangerButton, width: "100%", marginTop: "8px" }}
-                    onClick={deleteFixture}
-                  >
+                  <button type="button" style={{ ...styles.dangerButton, width: "100%" }} onClick={deleteFixture}>
                     Delete Fixture
                   </button>
                 </div>
 
                 <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>
-                    Match List
-                  </h3>
-                  <button
-                    type="button"
-                    style={{ ...styles.primaryButton, width: "100%", marginBottom: "12px" }}
-                    onClick={addMatch}
-                  >
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>Match List</h3>
+                  <button type="button" style={{ ...styles.primaryButton, width: "100%", marginBottom: "12px" }} onClick={addMatch}>
                     Add Match
                   </button>
 
@@ -2028,15 +955,11 @@ export default function App() {
                     <div
                       key={match.id}
                       style={{
-                        border:
-                          selectedMatch?.id === match.id
-                            ? `2px solid ${colors.gold}`
-                            : "1px solid #e2e8f0",
+                        border: selectedMatch?.id === match.id ? `2px solid ${colors.gold}` : "1px solid #e2e8f0",
                         borderRadius: "14px",
                         padding: "12px",
                         marginBottom: "10px",
-                        background:
-                          selectedMatch?.id === match.id ? "#fffdf7" : "white"
+                        background: selectedMatch?.id === match.id ? "#fffdf7" : "white"
                       }}
                     >
                       <button
@@ -2052,7 +975,7 @@ export default function App() {
                         }}
                       >
                         <div style={{ fontWeight: 700 }}>Match {index + 1}</div>
-                        <div style={styles.small}>
+                        <div style={{ fontSize: "14px", color: "#475569" }}>
                           {match.ourPlayers || "TBC"} vs {match.theirPlayers || "TBC"}
                         </div>
                         <div style={{ marginTop: "6px" }}>
@@ -2065,438 +988,126 @@ export default function App() {
               </div>
 
               <div>
-                <div style={{ ...styles.card, marginBottom: "16px", border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>
-                    Fixture Setup
-                  </h3>
+                <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>Edit Selected Match</h3>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr",
-                      gap: "12px"
-                    }}
-                  >
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Team Name</label>
-                      <select
-                        style={styles.select}
-                        value={fixture.teamName}
-                        onChange={(e) =>
-                          saveFixtureField("teamName", e.target.value)
-                        }
-                      >
-                        {TEAM_OPTIONS.map((team) => (
-                          <option key={team} value={team}>
-                            {team}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Competition</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.competition}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            competition: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("competition", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Date</label>
-                      <input
-                        style={styles.input}
-                        type="date"
-                        value={fixture.date}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            date: e.target.value
-                          }))
-                        }
-                        onBlur={(e) => saveFixtureField("date", e.target.value)}
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Opposition</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.opposition}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            opposition: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("opposition", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Venue</label>
-                      <select
-                        style={styles.select}
-                        value={fixture.venue}
-                        onChange={(e) => {
-                          setFixture((prev) => ({
-                            ...prev,
-                            venue: e.target.value
-                          }));
-                          saveFixtureField("venue", e.target.value);
-                        }}
-                      >
-                        <option>Home</option>
-                        <option>Away</option>
-                        <option>Neutral</option>
-                      </select>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Captain / Manager</label>
-                      <input
-                        style={styles.input}
-                        value={fixture.captain}
-                        onChange={(e) =>
-                          setFixture((prev) => ({
-                            ...prev,
-                            captain: e.target.value
-                          }))
-                        }
-                        onBlur={(e) =>
-                          saveFixtureField("captain", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    ...styles.card,
-                    background: colors.paleGold,
-                    borderColor: colors.gold,
-                    marginBottom: "16px"
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      color: colors.navy,
-                      marginBottom: "6px"
-                    }}
-                  >
-                    {liveOverallText}
-                  </div>
-                  <div style={styles.small}>
-                    Live overall: {liveTotals.us}-{liveTotals.them} • Portlaoise
-                    leading: {liveMatchSummary.ourLeading} • Opposition leading:{" "}
-                    {liveMatchSummary.theirLeading} • All square:{" "}
-                    {liveMatchSummary.allSquare}
-                  </div>
-                </div>
-
-                {selectedMatch ? (
-                  <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
-                    <h3 style={{ marginTop: 0, color: colors.navy }}>
-                      Edit Selected Match
-                    </h3>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr",
-                        gap: "12px"
-                      }}
-                    >
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Our Player(s)</label>
-                        <input
-                          style={styles.input}
-                          value={selectedMatch.ourPlayers}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, ourPlayers: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "ourPlayers",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Their Player(s)</label>
-                        <input
-                          style={styles.input}
-                          value={selectedMatch.theirPlayers}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, theirPlayers: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "theirPlayers",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Format</label>
-                        <select
-                          style={styles.select}
-                          value={selectedMatch.format}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "format",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option>Singles</option>
-                          <option>Fourball</option>
-                          <option>Foursomes</option>
-                        </select>
-                      </div>
-
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>Status</label>
-                        <select
-                          style={styles.select}
-                          value={selectedMatch.status}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "status",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option>Not Started</option>
-                          <option>In Progress</option>
-                          <option>Finished</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                      <div style={{ ...styles.label, marginBottom: "8px" }}>
-                        Quick Score Buttons
-                      </div>
+                  {selectedMatch ? (
+                    <>
                       <div
                         style={{
                           display: "grid",
-                          gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr 1fr",
-                          gap: "10px"
+                          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                          gap: "12px"
                         }}
                       >
-                        <button
-                          type="button"
-                          style={{ ...styles.softButton, width: "100%" }}
-                          onClick={() => setLeaderQuick("Our team")}
-                        >
+                        <div style={styles.inputWrap}>
+                          <label style={styles.label}>Our Player(s)</label>
+                          <input
+                            style={styles.input}
+                            value={selectedMatch.ourPlayers}
+                            onChange={(e) =>
+                              setMatches((prev) =>
+                                prev.map((m) =>
+                                  m.id === selectedMatch.id
+                                    ? { ...m, ourPlayers: e.target.value }
+                                    : m
+                                )
+                              )
+                            }
+                            onBlur={(e) => saveMatchField(selectedMatch.id, "ourPlayers", e.target.value)}
+                          />
+                        </div>
+
+                        <div style={styles.inputWrap}>
+                          <label style={styles.label}>Their Player(s)</label>
+                          <input
+                            style={styles.input}
+                            value={selectedMatch.theirPlayers}
+                            onChange={(e) =>
+                              setMatches((prev) =>
+                                prev.map((m) =>
+                                  m.id === selectedMatch.id
+                                    ? { ...m, theirPlayers: e.target.value }
+                                    : m
+                                )
+                              )
+                            }
+                            onBlur={(e) => saveMatchField(selectedMatch.id, "theirPlayers", e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+                          gap: "10px",
+                          marginBottom: "12px"
+                        }}
+                      >
+                        <button type="button" style={styles.softButton} onClick={() => saveMatchField(selectedMatch.id, "leader", "Our team")}>
                           Our Team Up
                         </button>
-                        <button
-                          type="button"
-                          style={{ ...styles.button, width: "100%" }}
-                          onClick={() => setLeaderQuick("All Square")}
-                        >
+                        <button type="button" style={styles.button} onClick={() => saveMatchField(selectedMatch.id, "leader", "All Square")}>
                           All Square
                         </button>
-                        <button
-                          type="button"
-                          style={{ ...styles.softButton, width: "100%" }}
-                          onClick={() => setLeaderQuick("Their team")}
-                        >
+                        <button type="button" style={styles.softButton} onClick={() => saveMatchField(selectedMatch.id, "leader", "Their team")}>
                           Their Team Up
                         </button>
                       </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr",
-                        gap: "12px",
-                        marginBottom: "10px"
-                      }}
-                    >
-                      <div
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "16px",
-                          padding: "14px"
-                        }}
-                      >
-                        <div style={{ ...styles.label, marginBottom: "10px" }}>
-                          Current Hole
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "10px"
-                          }}
-                        >
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustHole(-1)}
-                          >
-                            -
-                          </button>
-                          <div style={{ fontSize: "28px", fontWeight: 700 }}>
-                            {selectedMatch.currentHole}
-                          </div>
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustHole(1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "16px",
-                          padding: "14px"
-                        }}
-                      >
-                        <div style={{ ...styles.label, marginBottom: "10px" }}>
-                          Margin
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "10px"
-                          }}
-                        >
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustMargin(-1)}
-                          >
-                            -
-                          </button>
-                          <div style={{ fontSize: "28px", fontWeight: 700 }}>
-                            {selectedMatch.leader === "All Square"
-                              ? 0
-                              : selectedMatch.margin}
-                          </div>
-                          <button
-                            type="button"
-                            style={styles.button}
-                            onClick={() => adjustMargin(1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                      <div style={{ ...styles.label, marginBottom: "8px" }}>
-                        Match Result
-                      </div>
 
                       <div
                         style={{
                           display: "grid",
-                          gridTemplateColumns: isSmallMobile ? "1fr" : "1fr 1fr 1fr",
-                          gap: "10px",
-                          marginBottom: "10px"
+                          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                          gap: "12px",
+                          marginBottom: "12px"
                         }}
                       >
-                        <button
-                          type="button"
-                          style={{ ...styles.primaryButton, width: "100%" }}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Our team won"
-                            )
-                          }
-                        >
-                          Our Team Won
-                        </button>
-                        <button
-                          type="button"
-                          style={{ ...styles.button, width: "100%" }}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Their team won"
-                            )
-                          }
-                        >
-                          Their Team Won
-                        </button>
-                        <button
-                          type="button"
-                          style={{ ...styles.softButton, width: "100%" }}
-                          onClick={() =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishedResult",
-                              "Halved"
-                            )
-                          }
-                        >
-                          Halved
-                        </button>
+                        <div style={styles.inputWrap}>
+                          <label style={styles.label}>Status</label>
+                          <select
+                            style={styles.select}
+                            value={selectedMatch.status}
+                            onChange={(e) => saveMatchField(selectedMatch.id, "status", e.target.value)}
+                          >
+                            <option>Not Started</option>
+                            <option>In Progress</option>
+                            <option>Finished</option>
+                          </select>
+                        </div>
+
+                        <div style={styles.inputWrap}>
+                          <label style={styles.label}>Margin</label>
+                          <input
+                            style={styles.input}
+                            type="number"
+                            value={selectedMatch.margin || 0}
+                            onChange={(e) =>
+                              saveMatchField(selectedMatch.id, "margin", Number(e.target.value) || 0)
+                            }
+                          />
+                        </div>
                       </div>
 
                       <div style={styles.inputWrap}>
-                        <label style={styles.label}>
-                          Choose Standard Result
-                        </label>
+                        <label style={styles.label}>Current Hole</label>
+                        <input
+                          style={styles.input}
+                          type="number"
+                          value={selectedMatch.currentHole || 1}
+                          onChange={(e) =>
+                            saveMatchField(selectedMatch.id, "currentHole", Number(e.target.value) || 1)
+                          }
+                        />
+                      </div>
+
+                      <div style={styles.inputWrap}>
+                        <label style={styles.label}>Final Result</label>
                         <select
                           style={styles.select}
-                          value={selectedMatch.finishText}
-                          onChange={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishText",
-                              e.target.value
-                            )
-                          }
+                          value={selectedMatch.finishText || ""}
+                          onChange={(e) => saveMatchField(selectedMatch.id, "finishText", e.target.value)}
                         >
                           <option value="">Select a result</option>
                           {STANDARD_RESULTS.map((result) => (
@@ -2507,93 +1118,18 @@ export default function App() {
                         </select>
                       </div>
 
-                      <div style={styles.inputWrap}>
-                        <label style={styles.label}>
-                          Or Type Final Score Manually
-                        </label>
-                        <input
-                          style={styles.input}
-                          placeholder="e.g. 3&2, 4&3, 1 up"
-                          value={selectedMatch.finishText}
-                          onChange={(e) =>
-                            setMatches((prev) =>
-                              prev.map((m) =>
-                                m.id === selectedMatch.id
-                                  ? { ...m, finishText: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          onBlur={(e) =>
-                            saveMatchField(
-                              selectedMatch.id,
-                              "finishText",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
                       <button
                         type="button"
-                        style={{ ...styles.primaryButton, marginTop: "10px", width: isMobile ? "100%" : "auto" }}
-                        onClick={() =>
-                          saveMatchField(selectedMatch.id, "status", "Finished")
-                        }
-                      >
-                        Mark Match as Finished
-                      </button>
-                    </div>
-
-                    <div style={styles.inputWrap}>
-                      <label style={styles.label}>Notes</label>
-                      <input
-                        style={styles.input}
-                        value={selectedMatch.notes}
-                        onChange={(e) =>
-                          setMatches((prev) =>
-                            prev.map((m) =>
-                              m.id === selectedMatch.id
-                                ? { ...m, notes: e.target.value }
-                                : m
-                            )
-                          )
-                        }
-                        onBlur={(e) =>
-                          saveMatchField(
-                            selectedMatch.id,
-                            "notes",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: isSmallMobile ? "1fr" : "auto auto",
-                        gap: "10px",
-                        marginTop: "12px",
-                        alignItems: "center"
-                      }}
-                    >
-                      <span style={badgeStyle(selectedMatch)}>
-                        {liveStatus(selectedMatch)}
-                      </span>
-
-                      <button
-                        type="button"
-                        style={{ ...styles.dangerButton, width: isSmallMobile ? "100%" : "auto" }}
+                        style={{ ...styles.dangerButton, marginTop: "12px" }}
                         onClick={() => deleteMatch(selectedMatch.id)}
                       >
                         Delete Match
                       </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.card}>No match selected.</div>
-                )}
+                    </>
+                  ) : (
+                    <div>No match selected.</div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -2602,3 +1138,4 @@ export default function App() {
     </div>
   );
 }
+"}]}
