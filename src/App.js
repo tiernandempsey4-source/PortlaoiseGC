@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -1135,7 +1136,7 @@ export default function App() {
           </div>
         )}
       </div>
+      <Analytics />
     </div>
   );
 }
-"}]}
