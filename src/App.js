@@ -37,6 +37,9 @@ const db = getFirestore(app);
 const CREST_URL =
   "https://irp.cdn-website.com/282f6f7b/dms3rep/multi/Portlaoise+G.C.png";
 
+const CLUB_MESSAGE =
+  "Best of luck to all our Portlaoise teams, players and managers. A huge thank you to all our supporters, Captains Betty and Tiernan, and President Eddie.";
+
 const TEAM_OPTIONS = [
   "Barton Shield",
   "Irish Senior Cup",
@@ -970,33 +973,67 @@ export default function App() {
         <div
           style={{
             ...styles.card,
-            background: `linear-gradient(135deg, ${colors.navy} 0%, ${colors.royal} 100%)`,
+            background: `linear-gradient(135deg, ${colors.navy} 0%, #173d70 52%, ${colors.royal} 100%)`,
             color: "white",
             position: "relative",
             overflow: "hidden",
             marginBottom: "12px",
             border: `1px solid ${colors.gold}`,
-            padding: isMobile ? "14px" : "16px",
+            padding: isMobile ? "14px" : "18px",
+            boxShadow: "0 10px 26px rgba(15,45,82,0.16)",
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              right: isMobile ? "-42px" : "-32px",
+              top: isMobile ? "-36px" : "-30px",
+              width: isMobile ? "150px" : "190px",
+              height: isMobile ? "150px" : "190px",
+              borderRadius: "50%",
+              border: `2px solid ${colors.gold}`,
+              opacity: 0.16,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: isMobile ? "-16px" : "18px",
+              bottom: isMobile ? "-18px" : "-28px",
+              opacity: 0.08,
+              transform: isMobile ? "scale(1.15)" : "scale(1.55)",
+            }}
+          >
+            <img
+              src={CREST_URL}
+              alt="Portlaoise Golf Club crest watermark"
+              style={{ width: isMobile ? 120 : 160 }}
+            />
+          </div>
+
           <div
             style={{
               display: "flex",
               alignItems: isMobile ? "flex-start" : "center",
               flexDirection: isMobile ? "column" : "row",
               gap: "14px",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <div
               style={{
-                width: isMobile ? "62px" : "74px",
-                height: isMobile ? "62px" : "74px",
+                width: isMobile ? "64px" : "78px",
+                height: isMobile ? "64px" : "78px",
                 background: "rgba(255,255,255,0.12)",
-                borderRadius: "18px",
+                border: `1px solid rgba(212,166,74,0.7)`,
+                borderRadius: "20px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "8px",
+                boxShadow: "0 8px 22px rgba(0,0,0,0.18)",
+                flexShrink: 0,
               }}
             >
               <img
@@ -1005,14 +1042,14 @@ export default function App() {
                 style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
               />
             </div>
-            <div>
+            <div style={{ width: "100%" }}>
               <div
                 style={{
                   fontSize: "12px",
-                  fontWeight: 700,
+                  fontWeight: 800,
                   letterSpacing: "1.8px",
                   textTransform: "uppercase",
-                  opacity: 0.92,
+                  color: "#f8e7b9",
                 }}
               >
                 Portlaoise Golf Club
@@ -1021,23 +1058,28 @@ export default function App() {
                 style={{
                   color: "white",
                   margin: "6px 0 0 0",
-                  fontSize: isMobile ? "22px" : "28px",
-                  lineHeight: 1.15,
+                  fontSize: isMobile ? "23px" : "30px",
+                  lineHeight: 1.12,
+                  letterSpacing: "-0.3px",
                 }}
               >
                 Live Interclub Web App
               </h1>
-              <p
+              <div
                 style={{
-                  color: "rgba(255,255,255,0.95)",
-                  marginTop: "8px",
-                  marginBottom: 0,
+                  marginTop: "10px",
+                  padding: isMobile ? "10px 11px" : "12px 14px",
+                  borderLeft: `4px solid ${colors.gold}`,
+                  borderRadius: "12px",
+                  background: "rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.96)",
                   fontSize: isMobile ? "14px" : "16px",
                   lineHeight: 1.45,
+                  maxWidth: "920px",
                 }}
               >
-                Best of luck to all Portlaoise teams, players and managers. Thank you to all our supporters.
-              </p>
+                {CLUB_MESSAGE}
+              </div>
             </div>
           </div>
         </div>
