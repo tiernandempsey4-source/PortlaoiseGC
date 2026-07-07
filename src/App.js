@@ -42,37 +42,52 @@ const CLUB_MESSAGE =
 
 const TEAM_OPTIONS = [
   "Barton Shield",
+  "Barton Cup",
+  "Barton Cup (Super Seniors)",
   "Irish Senior Cup",
-  "Irish Junior Cup",
   "Irish Intermediate Cup",
-  "Jimmy Bruen",
-  "Pierce Purcell",
-  "JB Carr",
+  "Irish Junior Cup",
+  "Irish Boys Inter-Club",
+  "Irish Girls Inter-Club",
+  "Fred Daly Trophy",
+  "Jimmy Bruen Shield",
+  "Pierce Purcell Shield",
+  "JB Carr Diamond Trophy",
   "Central Towns Cup",
   "Duggan Cup",
   "Morrissey Cup",
-  "Senior Foursomes",
   "Leinster Fourball",
   "Leinster Clubs",
   "Provincial Towns Cup",
-  "Barton Cup",
-  "Barton Cup (Super Seniors)",
-  "Senior Cup",
-  "Senior Cup (55+)",
-  "Super Seniors Interclub",
+  "Senior Foursomes",
+  "Junior Foursomes",
+  "Fred Perry Trophy",
+  "Irish Mixed Foursomes",
+  "Flogas Irish Mixed Foursomes",
+  "Mixed Foursomes",
+  "Mixed Interclub",
+  "Men's Senior Cup",
+  "Men's Junior Cup",
+  "Men's Intermediate Cup",
+  "Men's Minor Cup",
+  "Men's Challenge Cup",
   "Ladies Senior Cup",
   "Ladies Intermediate Cup",
   "Ladies Junior Cup",
   "Ladies Minor Cup",
   "Ladies Challenge Cup",
   "Ladies Senior Foursomes",
-  "Mixed Foursomes",
-  "Flogas Mixed Foursomes",
-  "Irish Mixed",
-  "Mixed Interclub",
-  "Fred Daly Trophy",
-  "Boys Interclub",
-  "Girls Interclub",
+  "Ladies Intermediate Foursomes",
+  "Ladies Junior Foursomes",
+  "Revive Active Fourball",
+  "Australian Spoons",
+  "Women's Senior Cup",
+  "Women's Intermediate Cup",
+  "Women's Junior Cup",
+  "Women's Minor Cup",
+  "Women's Challenge Cup",
+  "Super Seniors Interclub",
+  "Senior Cup (55+)",
   "Minor Cup",
   "Challenge Match",
   "Friendly Match",
@@ -89,6 +104,18 @@ const STANDARD_RESULTS = [
   "8&7",
   "9&8",
   "10&8",
+  "10&9",
+  "11&10",
+  "12&11",
+  "Won on 19th",
+  "Won on 20th",
+  "Won on 21st",
+  "Won on 22nd",
+  "Won on 23rd",
+  "Won on 24th",
+  "Won on 25th",
+  "Conceded",
+  "Walkover",
 ];
 
 const colors = {
@@ -207,23 +234,39 @@ const styles = {
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
+function opponentPlayerName(opposition, num) {
+  const club = opposition && opposition.trim() ? opposition.trim() : "Opposition";
+  return `${club} Player ${num}`;
+}
+
 function getFormatFromCompetition(teamName) {
+  const name = teamName || "";
+
   const foursomesCompetitions = [
     "Mixed Foursomes",
+    "Irish Mixed Foursomes",
+    "Flogas Irish Mixed Foursomes",
     "Flogas Mixed Foursomes",
     "Ladies Senior Foursomes",
+    "Ladies Intermediate Foursomes",
+    "Ladies Junior Foursomes",
     "Senior Foursomes",
+    "Junior Foursomes",
   ];
 
   const fourballCompetitions = [
+    "JB Carr Diamond Trophy",
     "JB Carr",
+    "Jimmy Bruen Shield",
     "Jimmy Bruen",
+    "Pierce Purcell Shield",
     "Pierce Purcell",
     "Leinster Fourball",
+    "Revive Active Fourball",
   ];
 
-  if (foursomesCompetitions.includes(teamName)) return "Foursomes";
-  if (fourballCompetitions.includes(teamName)) return "Fourball";
+  if (foursomesCompetitions.includes(name)) return "Foursomes";
+  if (fourballCompetitions.includes(name)) return "Fourball";
   return "Singles";
 }
 
@@ -233,6 +276,7 @@ function defaultFixture(overrides = {}) {
     competition: "Interclub Match",
     ourClub: "Portlaoise Golf Club",
     opposition: "Opposition",
+    oppositionLogoUrl: "",
     venue: "Home",
     date: "",
     captain: "",
@@ -243,12 +287,12 @@ function defaultFixture(overrides = {}) {
   };
 }
 
-function defaultMatches(format = "Singles") {
+function defaultMatches(format = "Singles", opposition = "Opposition") {
   return [1, 2, 3, 4].map((num) => ({
     id: `match-${num}`,
     order: num,
     ourPlayers: `Player ${num}`,
-    theirPlayers: `Opponent ${num}`,
+    theirPlayers: opponentPlayerName(opposition, num),
     format,
     status: "Not Started",
     currentHole: 1,
@@ -353,6 +397,55 @@ function StatCard({ label, value }) {
   );
 }
 
+
+function getInitials(name) {
+  if (!name) return "GC";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function ClubLogo({ src, alt, fallback, size = 44 }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "14px",
+        border: `1px solid ${colors.gold}`,
+        background: src ? "white" : colors.paleGold,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        flexShrink: 0,
+      }}
+    >
+      {src ? (
+        <img
+          src={src}
+          alt={alt}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            padding: "5px",
+            boxSizing: "border-box",
+          }}
+        />
+      ) : (
+        <span style={{ color: colors.navy, fontWeight: 900, fontSize: "13px" }}>
+          {fallback || "GC"}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function getFixtureSummary(matches = [], ourClub = "Portlaoise Golf Club", opposition = "Opposition") {
   const official = matches.reduce(
     (acc, match) => {
@@ -413,22 +506,39 @@ function HomeFixtureCard({ fixture, summary, isActive, onClick, compact }) {
     >
       <div
         style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          letterSpacing: "1.2px",
-          textTransform: "uppercase",
-          color: colors.navy,
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          marginBottom: "8px",
         }}
       >
-        {fixture.teamName}
+        <ClubLogo src={CREST_URL} alt="Portlaoise Golf Club crest" fallback="PGC" size={42} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 800,
+              letterSpacing: "1.2px",
+              textTransform: "uppercase",
+              color: colors.navy,
+            }}
+          >
+            {fixture.teamName}
+          </div>
+          <div style={{ ...styles.small, marginTop: "2px" }}>
+            {fixture.venue || "Home"} {fixture.date ? `• ${fixture.date}` : ""}
+          </div>
+        </div>
+        <ClubLogo
+          src={fixture.oppositionLogoUrl}
+          alt={`${fixture.opposition} crest`}
+          fallback={getInitials(fixture.opposition)}
+          size={42}
+        />
       </div>
 
       <div style={{ fontSize: compact ? "16px" : "18px", fontWeight: 700, marginTop: "6px" }}>
         {fixture.ourClub || "Portlaoise Golf Club"} vs {fixture.opposition}
-      </div>
-
-      <div style={{ ...styles.small, marginTop: "8px" }}>
-        {fixture.venue || "Home"} {fixture.date ? `• ${fixture.date}` : ""}
       </div>
 
       <div
@@ -491,6 +601,7 @@ export default function App() {
   const [newFixtureTeam, setNewFixtureTeam] = useState("Barton Shield");
   const [newFixtureCustomTeam, setNewFixtureCustomTeam] = useState("");
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
+  const [newFixtureOppositionLogoUrl, setNewFixtureOppositionLogoUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [fixtureSummaries, setFixtureSummaries] = useState({});
@@ -527,7 +638,7 @@ export default function App() {
         if (nextFixtures.length === 0) {
           const fixtureRef = await addDoc(collection(db, "fixtures"), defaultFixture());
           const batch = writeBatch(db);
-          defaultMatches().forEach((match) => {
+          defaultMatches("Singles", "Opposition").forEach((match) => {
             batch.set(doc(db, "fixtures", fixtureRef.id, "matches", match.id), match);
           });
           await batch.commit();
@@ -591,7 +702,7 @@ export default function App() {
       async (snap) => {
         if (snap.empty) {
           const batch = writeBatch(db);
-          defaultMatches(getFormatFromCompetition(fixture.teamName)).forEach((match) => {
+          defaultMatches(getFormatFromCompetition(fixture.teamName), fixture.opposition).forEach((match) => {
             batch.set(doc(db, "fixtures", activeFixtureId, "matches", match.id), match);
           });
           await batch.commit();
@@ -705,6 +816,36 @@ export default function App() {
     );
   }
 
+  async function updateOppositionAndMatchNames(nextOpposition) {
+    if (!isCaptain || !activeFixtureId) return;
+
+    const cleanOpposition = nextOpposition || "Opposition";
+
+    const batch = writeBatch(db);
+    batch.set(
+      doc(db, "fixtures", activeFixtureId),
+      { opposition: cleanOpposition, updatedAt: Date.now() },
+      { merge: true }
+    );
+
+    matches.forEach((match, index) => {
+      const order = match.order || index + 1;
+      const currentName = match.theirPlayers || "";
+      const looksGeneric =
+        currentName === "" ||
+        currentName.startsWith("Opponent") ||
+        currentName.includes(" Player ");
+
+      if (looksGeneric) {
+        batch.update(doc(db, "fixtures", activeFixtureId, "matches", match.id), {
+          theirPlayers: opponentPlayerName(cleanOpposition, order),
+        });
+      }
+    });
+
+    await batch.commit();
+  }
+
   async function saveMatchField(matchId, key, value) {
     if (!isCaptain || !activeFixtureId) return;
     const patch = { [key]: value };
@@ -728,7 +869,7 @@ export default function App() {
       id: nextId,
       order: nextOrder,
       ourPlayers: `Player ${nextOrder}`,
-      theirPlayers: `Opponent ${nextOrder}`,
+      theirPlayers: opponentPlayerName(fixture.opposition, nextOrder),
       format: getFormatFromCompetition(fixture.teamName),
       status: "Not Started",
       leader: "All Square",
@@ -772,17 +913,20 @@ export default function App() {
         ? newFixtureCustomTeam.trim() || "Custom Competition"
         : newFixtureTeam;
 
+    const opposition = newFixtureOpposition || "Opposition";
+
     const fixtureRef = await addDoc(
       collection(db, "fixtures"),
       defaultFixture({
         teamName: finalTeamName,
         competition: finalTeamName,
-        opposition: newFixtureOpposition || "Opposition",
+        opposition,
+        oppositionLogoUrl: newFixtureOppositionLogoUrl.trim(),
       })
     );
 
     const batch = writeBatch(db);
-    defaultMatches(getFormatFromCompetition(finalTeamName)).forEach((match) => {
+    defaultMatches(getFormatFromCompetition(finalTeamName), opposition).forEach((match) => {
       batch.set(doc(db, "fixtures", fixtureRef.id, "matches", match.id), match);
     });
     await batch.commit();
@@ -790,6 +934,7 @@ export default function App() {
     setActiveFixtureId(fixtureRef.id);
     setSelectedMatchId("match-1");
     setNewFixtureOpposition("");
+    setNewFixtureOppositionLogoUrl("");
     setNewFixtureCustomTeam("");
     setNewFixtureTeam("Barton Shield");
     setScreen("captain");
@@ -826,13 +971,13 @@ export default function App() {
 
   async function adjustHole(amount) {
     if (!selectedMatch || !isCaptain) return;
-    const next = Math.min(19, Math.max(1, (selectedMatch.currentHole || 1) + amount));
+    const next = Math.min(25, Math.max(1, (selectedMatch.currentHole || 1) + amount));
     await saveMatchField(selectedMatch.id, "currentHole", next);
   }
 
   async function adjustMargin(amount) {
     if (!selectedMatch || !isCaptain || selectedMatch.leader === "All Square") return;
-    const next = Math.min(10, Math.max(1, (selectedMatch.margin || 1) + amount));
+    const next = Math.min(12, Math.max(1, (selectedMatch.margin || 1) + amount));
     await saveMatchField(selectedMatch.id, "margin", next);
   }
 
@@ -1137,13 +1282,12 @@ export default function App() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(6, 1fr)",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(5, 1fr)",
             gap: "9px",
             marginBottom: "12px",
           }}
         >
           <button style={navButtonStyle("home")} onClick={() => setScreen("home")}>Home</button>
-          <button style={navButtonStyle("spectator")} onClick={() => setScreen("spectator")}>Spectator</button>
           <button style={navButtonStyle("captain")} onClick={() => setScreen("captain")}>Captain</button>
           <button style={navButtonStyle("tv")} onClick={() => setScreen("tv")}>TV Mode</button>
           <button style={{ ...styles.button, width: "100%" }} onClick={copySummary}>Copy Summary</button>
@@ -1214,7 +1358,7 @@ export default function App() {
                 {liveOverallText}
               </div>
 
-              <MatchList matches={matches} isMobile={isMobile} />
+              <MatchList matches={matches} fixture={fixture} isMobile={isMobile} />
             </div>
           </div>
         ) : screen === "spectator" ? (
@@ -1303,7 +1447,7 @@ export default function App() {
                 </div>
               </div>
 
-              <MatchList matches={matches} isMobile={isMobile} />
+              <MatchList matches={matches} fixture={fixture} isMobile={isMobile} />
             </div>
           </div>
         ) : !isCaptain ? (
@@ -1330,7 +1474,7 @@ export default function App() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr auto",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr auto",
                   gap: "12px",
                 }}
               >
@@ -1363,6 +1507,16 @@ export default function App() {
                     value={newFixtureOpposition}
                     onChange={(e) => setNewFixtureOpposition(e.target.value)}
                     placeholder="Opposition name"
+                  />
+                </div>
+
+                <div style={styles.inputWrap}>
+                  <label style={styles.label}>Opposition Logo URL</label>
+                  <input
+                    style={styles.input}
+                    value={newFixtureOppositionLogoUrl}
+                    onChange={(e) => setNewFixtureOppositionLogoUrl(e.target.value)}
+                    placeholder="Paste crest/logo image URL"
                   />
                 </div>
 
@@ -1475,7 +1629,18 @@ export default function App() {
                         style={styles.input}
                         value={fixture.opposition || ""}
                         onChange={(e) => setFixture((prev) => ({ ...prev, opposition: e.target.value }))}
-                        onBlur={(e) => saveFixtureField("opposition", e.target.value)}
+                        onBlur={(e) => updateOppositionAndMatchNames(e.target.value)}
+                      />
+                    </div>
+
+                    <div style={styles.inputWrap}>
+                      <label style={styles.label}>Opposition Logo URL</label>
+                      <input
+                        style={styles.input}
+                        value={fixture.oppositionLogoUrl || ""}
+                        onChange={(e) => setFixture((prev) => ({ ...prev, oppositionLogoUrl: e.target.value }))}
+                        onBlur={(e) => saveFixtureField("oppositionLogoUrl", e.target.value)}
+                        placeholder="Paste crest/logo image URL"
                       />
                     </div>
 
@@ -1568,7 +1733,7 @@ export default function App() {
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                      <CounterBox label="Current Hole" value={selectedMatch.currentHole || 1} onMinus={() => adjustHole(-1)} onPlus={() => adjustHole(1)} />
+                      <CounterBox label="Current Hole / Playoff" value={selectedMatch.currentHole || 1} onMinus={() => adjustHole(-1)} onPlus={() => adjustHole(1)} />
                       <CounterBox label="Margin" value={selectedMatch.leader === "All Square" ? 0 : selectedMatch.margin || 1} onMinus={() => adjustMargin(-1)} onPlus={() => adjustMargin(1)} />
                     </div>
 
@@ -1579,7 +1744,7 @@ export default function App() {
                     </div>
 
                     <div style={styles.inputWrap}>
-                      <label style={styles.label}>Final Result</label>
+                      <label style={styles.label}>Final Result / Playoff Result</label>
                       <select style={styles.select} value={selectedMatch.finishText || ""} onChange={(e) => saveMatchField(selectedMatch.id, "finishText", e.target.value)}>
                         <option value="">Select a result</option>
                         {STANDARD_RESULTS.map((result) => (
@@ -1619,7 +1784,7 @@ export default function App() {
   );
 }
 
-function MatchList({ matches, isMobile }) {
+function MatchList({ matches, fixture, isMobile }) {
   return (
     <div style={{ display: "grid", gap: "10px" }}>
       {matches.map((match, index) => (
@@ -1629,18 +1794,34 @@ function MatchList({ matches, isMobile }) {
             border: "1px solid #e2e8f0",
             borderRadius: "14px",
             padding: "12px",
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            justifyContent: "space-between",
-            alignItems: isMobile ? "flex-start" : "center",
-            gap: "10px",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 1fr) auto",
+            gap: "12px",
+            alignItems: "center",
           }}
         >
-          <div>
-            <div style={{ fontWeight: 700, color: colors.navy }}>Match {index + 1}</div>
-            <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
-            <div style={styles.small}>vs {match.theirPlayers || "TBC"}</div>
-            <div style={{ ...styles.small, marginTop: "4px" }}>{match.format || "Singles"}</div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "44px 1fr 44px" : "48px 1fr 48px",
+              gap: "10px",
+              alignItems: "center",
+              minWidth: 0,
+            }}
+          >
+            <ClubLogo src={CREST_URL} alt="Portlaoise crest" fallback="PGC" size={isMobile ? 42 : 46} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 700, color: colors.navy }}>Match {index + 1}</div>
+              <div style={styles.small}>{match.ourPlayers || "TBC"}</div>
+              <div style={styles.small}>vs {match.theirPlayers || "TBC"}</div>
+              <div style={{ ...styles.small, marginTop: "4px" }}>{match.format || "Singles"}</div>
+            </div>
+            <ClubLogo
+              src={fixture?.oppositionLogoUrl}
+              alt={`${fixture?.opposition || "Opposition"} crest`}
+              fallback={getInitials(fixture?.opposition)}
+              size={isMobile ? 42 : 46}
+            />
           </div>
           <span style={badgeStyle(match)}>{liveStatus(match)}</span>
         </div>
