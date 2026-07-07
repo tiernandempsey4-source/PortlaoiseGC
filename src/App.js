@@ -604,7 +604,7 @@ export default function App() {
   const [newFixtureCustomTeam, setNewFixtureCustomTeam] = useState("");
   const [newFixtureOpposition, setNewFixtureOpposition] = useState("");
   const [newFixtureOppositionLogoUrl, setNewFixtureOppositionLogoUrl] = useState("");
-  const [captainTab, setCaptainTab] = useState("live");
+  const [captainTab, setCaptainTab] = useState("updates");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [fixtureSummaries, setFixtureSummaries] = useState({});
@@ -650,9 +650,9 @@ export default function App() {
 
         setFixtures(nextFixtures);
         setActiveFixtureId((current) => {
-          if (current && nextFixtures.find((fx) => fx.id === current)) return current;
+          if (current && nextFixtures.find((fx) => fx.id === current && !fx.isArchived)) return current;
           const firstLiveFixture = nextFixtures.find((fx) => !fx.isArchived);
-          return (firstLiveFixture || nextFixtures[0]).id;
+          return firstLiveFixture ? firstLiveFixture.id : nextFixtures[0].id;
         });
         setLoading(false);
       },
@@ -938,6 +938,11 @@ export default function App() {
       { merge: true }
     );
 
+    const nextLiveFixture = liveFixtures.find((item) => item.id !== activeFixtureId);
+    if (nextLiveFixture) {
+      setActiveFixtureId(nextLiveFixture.id);
+    }
+
     setCaptainTab("archive");
   }
 
@@ -954,7 +959,7 @@ export default function App() {
       { merge: true }
     );
     setActiveFixtureId(fixtureId);
-    setCaptainTab("live");
+    setCaptainTab("updates");
   }
 
 
@@ -1334,7 +1339,7 @@ export default function App() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(5, 1fr)",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
             gap: "9px",
             marginBottom: "12px",
           }}
@@ -1553,7 +1558,7 @@ export default function App() {
                     Matchday Control Panel
                   </h2>
                   <div style={styles.small}>
-                    Clean setup, live scoring, final results and fixture archive.
+                    Clean setup, live scoring, finishing matches and fixture archive.
                   </div>
                 </div>
 
@@ -1601,22 +1606,15 @@ export default function App() {
                       setSelectedMatchId("");
                     }}
                   >
-                    <optgroup label="Live Fixtures">
-                      {liveFixtures.map((item) => (
+                    {liveFixtures.length ? (
+                      liveFixtures.map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.teamName} vs {item.opposition}
                         </option>
-                      ))}
-                    </optgroup>
-                    {archivedFixtures.length ? (
-                      <optgroup label="Archived Fixtures">
-                        {archivedFixtures.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            Archived: {item.teamName} vs {item.opposition}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ) : null}
+                      ))
+                    ) : (
+                      <option value={activeFixtureId}>No live fixtures available</option>
+                    )}
                   </select>
                 </div>
 
@@ -1633,11 +1631,8 @@ export default function App() {
                   <TabButton active={captainTab === "setup"} onClick={() => setCaptainTab("setup")}>
                     Fixture Setup
                   </TabButton>
-                  <TabButton active={captainTab === "live"} onClick={() => setCaptainTab("live")}>
-                    Live Scoring
-                  </TabButton>
-                  <TabButton active={captainTab === "results"} onClick={() => setCaptainTab("results")}>
-                    Results
+                  <TabButton active={captainTab === "updates"} onClick={() => setCaptainTab("updates")}>
+                    Match Updates
                   </TabButton>
                   <TabButton active={captainTab === "archive"} onClick={() => setCaptainTab("archive")}>
                     Archive
@@ -1872,10 +1867,10 @@ export default function App() {
               </div>
             ) : null}
 
-            {captainTab === "live" ? (
+            {captainTab === "updates" ? (
               <div>
                 <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
-                  <h3 style={{ marginTop: 0, color: colors.navy }}>Live Scoring</h3>
+                  <h3 style={{ marginTop: 0, color: colors.navy }}>Match Updates</h3>
                   <div
                     style={{
                       padding: "13px",
@@ -1924,14 +1919,34 @@ export default function App() {
                           const next = Math.min(12, Math.max(1, (match.margin || 1) + 1));
                           saveMatchField(match.id, "margin", next);
                         }}
+                        onFinishedResult={(value) => saveMatchField(match.id, "finishedResult", value)}
+                        onFinishText={(value) => saveMatchField(match.id, "finishText", value)}
+                        onMarkFinished={() => saveMatchField(match.id, "status", "Finished")}
+                        onNotes={(value) => saveMatchField(match.id, "notes", value)}
                       />
                     ))}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                      gap: "10px",
+                      marginTop: "16px",
+                    }}
+                  >
+                    <button type="button" style={styles.primaryButton} onClick={copySummary}>
+                      Copy Match Summary
+                    </button>
+                    <button type="button" style={styles.softButton} onClick={archiveFixture}>
+                      Move Fixture to Archive
+                    </button>
                   </div>
                 </div>
               </div>
             ) : null}
 
-            {captainTab === "results" ? (
+            {false ? (
               <div>
                 <div style={{ ...styles.card, border: `1px solid ${colors.gold}` }}>
                   <h3 style={{ marginTop: 0, color: colors.navy }}>Results Centre</h3>
@@ -2037,12 +2052,9 @@ export default function App() {
                               <button
                                 type="button"
                                 style={styles.button}
-                                onClick={() => {
-                                  setActiveFixtureId(item.id);
-                                  setCaptainTab("results");
-                                }}
+                                onClick={() => setActiveFixtureId(item.id)}
                               >
-                                View Results
+                                Select in Archive
                               </button>
                               <button
                                 type="button"
@@ -2131,6 +2143,10 @@ function LiveMatchControlCard({
   onHolePlus,
   onMarginMinus,
   onMarginPlus,
+  onFinishedResult,
+  onFinishText,
+  onMarkFinished,
+  onNotes,
 }) {
   return (
     <div
@@ -2229,6 +2245,71 @@ function LiveMatchControlCard({
           onPlus={onMarginPlus}
           disabled={match.leader === "All Square"}
         />
+      </div>
+
+      <div
+        style={{
+          marginTop: "14px",
+          paddingTop: "14px",
+          borderTop: "1px solid #e2e8f0",
+        }}
+      >
+        <div style={{ ...styles.label, marginBottom: "10px" }}>Finish Match</div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+            gap: "10px",
+            marginBottom: "12px",
+          }}
+        >
+          <button type="button" style={styles.primaryButton} onClick={() => onFinishedResult("Our team won")}>
+            Our Team Won
+          </button>
+          <button type="button" style={styles.button} onClick={() => onFinishedResult("Their team won")}>
+            Opposition Won
+          </button>
+          <button type="button" style={styles.softButton} onClick={() => onFinishedResult("Halved")}>
+            Halved
+          </button>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: "12px",
+          }}
+        >
+          <div style={styles.inputWrap}>
+            <label style={styles.label}>Final Result / Playoff Result</label>
+            <select
+              style={styles.select}
+              value={match.finishText || ""}
+              onChange={(e) => onFinishText(e.target.value)}
+            >
+              <option value="">Select a result</option>
+              {STANDARD_RESULTS.map((result) => (
+                <option key={result} value={result}>{result}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={styles.inputWrap}>
+            <label style={styles.label}>Notes</label>
+            <input
+              style={styles.input}
+              defaultValue={match.notes || ""}
+              onBlur={(e) => onNotes(e.target.value)}
+              placeholder="Optional notes"
+            />
+          </div>
+        </div>
+
+        <button type="button" style={styles.primaryButton} onClick={onMarkFinished}>
+          Mark Match as Finished
+        </button>
       </div>
     </div>
   );
